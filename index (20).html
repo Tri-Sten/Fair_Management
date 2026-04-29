@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MDM 2026">
+<meta name="theme-color" content="#0e1116">
+<title>MDM 2026 — Field BD</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230e1116'/%3E%3Cpath d='M16 44V20l16 14 16-14v24' fill='none' stroke='%23d4a93a' stroke-width='4' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230e1116'/%3E%3Cpath d='M16 44V20l16 14 16-14v24' fill='none' stroke='%23d4a93a' stroke-width='4' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Condensed:wght@500;600;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0e1116;
+  --bg-elev: #161a21;
+  --surface: #1a1f26;
+  --surface-2: #232932;
+  --border: #2a313a;
+  --border-strong: #3a424d;
+  --text: #e8e6e1;
+  --text-dim: #9ca3af;
+  --text-faint: #6b7280;
+  --accent: #d4a93a;
+  --accent-dim: #8a6f26;
+  --teal: #5a9b9e;
+  --done: #5cb85c;
+  --followup: #d4a93a;
+  --todo: #d65a47;
+  --skip: #6b7280;
+  --priorityA: #d65a47;
+  --priorityB: #5a9b9e;
+  --shadow-lg: 0 12px 40px rgba(0,0,0,0.6);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+html { font-size: 16px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 400;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+  position: fixed; inset: 0;
+  overflow: hidden;
+}
+
+/* === Subtle texture === */
+body::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image:
+    radial-gradient(800px circle at 80% -10%, rgba(212,169,58,0.05), transparent 50%),
+    radial-gradient(500px circle at 0% 100%, rgba(90,155,158,0.04), transparent 50%);
+}
+
+/* === Top bar === */
+.appbar {
+  position: relative; z-index: 10;
+  padding: calc(var(--safe-top) + 12px) 16px 12px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: linear-gradient(180deg, var(--bg) 0%, rgba(14,17,22,0.8) 100%);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.appbar-title {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 700; font-size: 22px; letter-spacing: 0.04em;
+  text-transform: uppercase;
+  display: flex; align-items: center; gap: 10px;
+}
+.appbar-title .logo {
+  width: 26px; height: 26px;
+  background: var(--accent); border-radius: 6px;
+  display: grid; place-items: center;
+  color: var(--bg); font-weight: 800; font-size: 14px;
+  box-shadow: 0 0 0 1px rgba(212,169,58,0.3), 0 4px 12px rgba(212,169,58,0.2);
+}
+.appbar-stats {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--text-dim);
+  letter-spacing: 0.05em;
+}
+.appbar-stats .pill {
+  padding: 4px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+.appbar-stats .pill strong { color: var(--accent); font-weight: 600; }
+
+/* === Main content area === */
+.main {
+  position: absolute;
+  top: calc(var(--safe-top) + 50px);
+  bottom: calc(var(--safe-bottom) + 60px);
+  left: 0; right: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  z-index: 1;
+}
+
+.view { display: none; padding: 0 0 24px; }
+.view.active { display: block; }
+
+/* === Filter bar === */
+.filterbar {
+  position: sticky; top: 0; z-index: 5;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 12px 12px;
+}
+.search-row {
+  position: relative;
+  margin-bottom: 8px;
+}
+.search-row input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px 10px 36px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .15s;
+}
+.search-row input:focus { border-color: var(--accent-dim); }
+.search-row::before {
+  content: '';
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  width: 16px; height: 16px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.3-4.3'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+.chip-row {
+  display: flex; gap: 6px; overflow-x: auto;
+  scrollbar-width: none; -ms-overflow-style: none;
+  padding-bottom: 2px;
+}
+.chip-row::-webkit-scrollbar { display: none; }
+.chip {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.02em;
+}
+.chip.active {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+.chip.status-todo.active { background: var(--todo); border-color: var(--todo); color: white; }
+.chip.status-done.active { background: var(--done); border-color: var(--done); color: white; }
+.chip.status-followup.active { background: var(--followup); border-color: var(--followup); color: var(--bg); }
+
+/* === List === */
+.list {
+  padding: 8px 12px 0;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  position: relative;
+  transition: transform .1s, border-color .15s, background .15s;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.card:active { transform: scale(0.99); background: var(--surface-2); }
+.card.status-done { border-left: 3px solid var(--done); }
+.card.status-followup { border-left: 3px solid var(--followup); }
+.card.status-skip { border-left: 3px solid var(--skip); opacity: 0.55; }
+.card.status-todo { border-left: 3px solid transparent; }
+
+.card-row1 {
+  display: flex; align-items: center; gap: 8px;
+  flex-wrap: wrap;
+}
+.priority-badge {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 800; font-size: 12px;
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+  border-radius: 4px;
+  letter-spacing: 0;
+}
+.priority-A { background: var(--priorityA); color: white; }
+.priority-B { background: var(--priorityB); color: var(--bg); }
+.segment-tag {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+  padding: 2px 6px;
+  background: var(--bg-elev);
+  border-radius: 3px;
+}
+.status-icon {
+  margin-left: auto;
+  font-size: 16px;
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+}
+.status-icon.done { background: var(--done); color: white; }
+.status-icon.followup { background: var(--followup); color: var(--bg); }
+.status-icon.skip { background: var(--skip); color: white; opacity: 0.6; }
+
+.card-name {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  color: var(--text);
+}
+.card-meta {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  font-size: 12px; color: var(--text-dim);
+}
+.card-meta .booth {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 500;
+  color: var(--accent);
+}
+.card-products {
+  font-size: 12px;
+  color: var(--text-faint);
+  line-height: 1.35;
+  font-style: italic;
+}
+
+/* === Bottom tabs === */
+.tabbar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  background: var(--bg-elev);
+  border-top: 1px solid var(--border);
+  padding-bottom: var(--safe-bottom);
+}
+.tab {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 2px;
+  padding: 8px 4px 6px;
+  cursor: pointer;
+  color: var(--text-faint);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace;
+  transition: color .15s;
+}
+.tab svg { width: 22px; height: 22px; stroke: currentColor; }
+.tab.active { color: var(--accent); }
+.tab .badge {
+  position: absolute;
+  margin-left: 22px; margin-top: -2px;
+  background: var(--accent); color: var(--bg);
+  font-size: 9px; font-weight: 700;
+  padding: 1px 4px; border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* === Detail modal === */
+.modal-backdrop {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  display: none;
+}
+.modal-backdrop.open { display: block; }
+.modal {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  top: var(--safe-top);
+  z-index: 51;
+  background: var(--bg);
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  transform: translateY(100%);
+  transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; flex-direction: column;
+  box-shadow: var(--shadow-lg);
+}
+.modal.open { transform: translateY(0); }
+.modal-handle {
+  width: 40px; height: 4px;
+  background: var(--border-strong);
+  border-radius: 2px;
+  margin: 8px auto 4px;
+  flex-shrink: 0;
+}
+.modal-header {
+  padding: 8px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 10px;
+  flex-shrink: 0;
+}
+.modal-header-info { flex: 1; min-width: 0; }
+.modal-header-info h2 {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 700; font-size: 22px;
+  letter-spacing: 0.01em; line-height: 1.15;
+  margin-bottom: 4px;
+}
+.modal-header-info .subline {
+  font-size: 12px; color: var(--text-dim);
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+}
+.modal-header-info .subline .booth {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--accent); font-weight: 600;
+}
+.modal-close {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; width: 32px; height: 32px;
+  display: grid; place-items: center;
+  cursor: pointer; color: var(--text-dim);
+  flex-shrink: 0;
+}
+.modal-close:active { background: var(--surface-2); }
+.modal-body {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 14px 16px calc(var(--safe-bottom) + 16px);
+}
+
+.section {
+  margin-bottom: 18px;
+}
+.section-title {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; text-transform: uppercase;
+  color: var(--accent); letter-spacing: 0.1em;
+  margin-bottom: 8px; font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+}
+.section-title::before {
+  content: ''; width: 8px; height: 1px; background: var(--accent);
+}
+.brief {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.brief-row { display: flex; flex-direction: column; gap: 2px; }
+.brief-row .label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.brief-row .value {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.45;
+}
+.brief-row.compact { flex-direction: row; gap: 8px; align-items: baseline; }
+.brief-row.compact .label { min-width: 80px; }
+
+/* === Status buttons === */
+.status-buttons {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+.status-btn {
+  padding: 12px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 4px;
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  transition: all .15s;
+}
+.status-btn svg { width: 22px; height: 22px; }
+.status-btn:active { transform: scale(0.97); }
+.status-btn.active.done { background: var(--done); color: white; border-color: var(--done); }
+.status-btn.active.followup { background: var(--followup); color: var(--bg); border-color: var(--followup); }
+.status-btn.active.skip { background: var(--skip); color: white; border-color: var(--skip); }
+
+/* === Form fields === */
+.field {
+  margin-bottom: 12px;
+}
+.field label {
+  display: block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+.input, .textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .15s;
+  resize: vertical;
+}
+.input:focus, .textarea:focus { border-color: var(--accent-dim); }
+.textarea { min-height: 100px; line-height: 1.5; }
+
+.summary-row {
+  position: relative;
+}
+.dictate-btn {
+  position: absolute; right: 8px; bottom: 8px;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  display: grid; place-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(212,169,58,0.3);
+  transition: transform .1s;
+}
+.dictate-btn svg { width: 18px; height: 18px; }
+.dictate-btn:active { transform: scale(0.95); }
+.dictate-btn.recording {
+  background: var(--todo);
+  animation: pulse 1.2s infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(214,90,71,0.5); }
+  50% { box-shadow: 0 0 0 12px rgba(214,90,71,0); }
+}
+.dictate-lang {
+  position: absolute; left: 0; bottom: -22px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-faint);
+  display: flex; gap: 8px;
+}
+.dictate-lang span { cursor: pointer; padding: 2px 4px; border-radius: 3px; }
+.dictate-lang span.active { background: var(--surface); color: var(--accent); }
+
+/* === Photos === */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 6px;
+}
+.photo-thumb {
+  position: relative;
+  aspect-ratio: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.photo-thumb .remove {
+  position: absolute; top: 2px; right: 2px;
+  background: rgba(0,0,0,0.7);
+  color: white; width: 20px; height: 20px;
+  border-radius: 50%; border: none;
+  display: grid; place-items: center;
+  cursor: pointer; font-size: 14px; line-height: 1;
+}
+.photo-add {
+  aspect-ratio: 1;
+  background: var(--surface);
+  border: 1px dashed var(--border-strong);
+  border-radius: 6px;
+  display: grid; place-items: center;
+  cursor: pointer;
+  color: var(--text-dim);
+}
+.photo-add svg { width: 24px; height: 24px; }
+.photo-add input[type="file"] { display: none; }
+
+.photo-fullscreen {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.95);
+  display: none; place-items: center;
+  padding: 20px;
+}
+.photo-fullscreen.open { display: grid; }
+.photo-fullscreen img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.photo-fullscreen .close {
+  position: absolute; top: 20px; right: 20px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; width: 36px; height: 36px;
+  display: grid; place-items: center;
+  cursor: pointer; color: var(--text);
+  font-size: 20px;
+}
+
+/* === Stats view === */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 8px; padding: 12px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+}
+.stat-card .label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; text-transform: uppercase;
+  color: var(--text-faint); letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+.stat-card .value {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 700; font-size: 28px;
+  letter-spacing: 0.01em;
+  color: var(--text);
+}
+.stat-card .value.accent { color: var(--accent); }
+.stat-card .value.done { color: var(--done); }
+.stat-card .value.followup { color: var(--followup); }
+.stat-card .sub {
+  font-size: 11px; color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--bg-elev);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.progress-bar > div {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width .3s;
+}
+
+.section-list {
+  padding: 0 12px;
+  margin-top: 12px;
+}
+.section-list h3 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; text-transform: uppercase;
+  color: var(--accent); letter-spacing: 0.08em;
+  margin: 16px 0 8px; font-weight: 600;
+}
+
+.activity-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.activity-item:active { background: var(--surface-2); }
+.activity-item .name {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 600; font-size: 14px;
+}
+.activity-item .ts {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--text-faint);
+}
+
+.danger-zone {
+  padding: 12px;
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%;
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 600; font-size: 14px;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  cursor: pointer;
+  margin-bottom: 8px;
+}
+.btn:active { background: var(--surface-2); }
+.btn svg { width: 18px; height: 18px; }
+.btn.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.btn.danger { color: var(--todo); border-color: rgba(214,90,71,0.3); }
+
+/* === Plan view === */
+.route-step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 8px;
+  position: relative;
+  padding-left: 50px;
+}
+.route-step::before {
+  content: attr(data-order);
+  position: absolute; left: 12px; top: 14px;
+  width: 28px; height: 28px;
+  background: var(--accent); color: var(--bg);
+  border-radius: 50%; display: grid; place-items: center;
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 700; font-size: 14px;
+}
+.route-step .slot {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 2px;
+}
+.route-step .place {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 600; font-size: 15px;
+  margin-bottom: 4px;
+}
+.route-step .action {
+  font-size: 13px; color: var(--text-dim); line-height: 1.4;
+}
+
+/* === Empty state === */
+.empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-faint);
+}
+.empty svg { width: 48px; height: 48px; opacity: 0.4; margin-bottom: 12px; }
+.empty p { font-size: 14px; }
+
+/* === Toast === */
+.toast {
+  position: fixed; bottom: calc(80px + var(--safe-bottom));
+  left: 50%; transform: translateX(-50%) translateY(100px);
+  background: var(--accent); color: var(--bg);
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 600; font-size: 13px;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  z-index: 200;
+  transition: transform .3s;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* === Switch session vs target === */
+.subtab-row {
+  display: flex; gap: 4px; padding: 8px 12px 0;
+  background: var(--bg);
+}
+.subtab {
+  flex: 1;
+  padding: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 600; font-size: 13px;
+  letter-spacing: 0.04em; text-transform: uppercase;
+  text-align: center;
+  cursor: pointer;
+  color: var(--text-dim);
+}
+.subtab.active {
+  background: var(--accent); color: var(--bg);
+  border-color: var(--accent);
+}
+
+/* === Scripts === */
+.script-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 8px;
+}
+.script-card h4 {
+  font-family: 'Saira Condensed', sans-serif;
+  font-weight: 700; font-size: 16px;
+  margin-bottom: 4px;
+  color: var(--accent);
+  text-transform: uppercase; letter-spacing: 0.03em;
+}
+.script-card .target {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; color: var(--text-faint);
+  text-transform: uppercase; letter-spacing: 0.06em;
+  margin-bottom: 8px;
+}
+.script-card .pitch {
+  font-size: 13px; line-height: 1.5;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.script-card .qualifier {
+  font-size: 12px; line-height: 1.4;
+  color: var(--text-dim);
+  font-style: italic;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+@media (min-width: 600px) {
+  .stats-grid { grid-template-columns: repeat(3, 1fr); }
+  .modal { max-width: 600px; left: 50%; transform: translate(-50%, 100%); }
+  .modal.open { transform: translate(-50%, 0); }
+}
+</style>
+</head>
+<body>
+
+<header class="appbar">
+  <div class="appbar-title">
+    <span class="logo">M</span>
+    <span>MDM 2026</span>
+  </div>
+  <div class="appbar-stats" id="appbar-stats">
+    <span class="pill"><strong id="stat-done">0</strong>/93</span>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- TARGETS / SESSIONS VIEW -->
+  <div class="view active" id="view-list">
+    <div class="subtab-row">
+      <div class="subtab active" data-subtab="targets">Sociétés <span id="tg-count" style="opacity:.6;font-size:11px"></span></div>
+      <div class="subtab" data-subtab="sessions">Sessions <span id="ss-count" style="opacity:.6;font-size:11px"></span></div>
+    </div>
+    <div class="filterbar">
+      <div class="search-row">
+        <input type="search" id="search" placeholder="Recherche société, segment, booth, personne…" autocomplete="off">
+      </div>
+      <div class="chip-row" id="chip-row">
+        <div class="chip active" data-filter="priority" data-value="all">Tous</div>
+        <div class="chip" data-filter="priority" data-value="A">Priorité A</div>
+        <div class="chip" data-filter="priority" data-value="B">Priorité B</div>
+        <div class="chip status-todo" data-filter="status" data-value="todo">À faire</div>
+        <div class="chip status-done" data-filter="status" data-value="done">Faits</div>
+        <div class="chip status-followup" data-filter="status" data-value="followup">Follow-up</div>
+      </div>
+    </div>
+    <div class="list" id="list-container"></div>
+  </div>
+
+  <!-- PLAN / ROUTE VIEW -->
+  <div class="view" id="view-plan">
+    <div style="padding: 16px 12px 8px;">
+      <h2 style="font-family:'Saira Condensed';font-weight:700;font-size:20px;letter-spacing:0.02em;margin-bottom:4px;">Route de visite</h2>
+      <p style="font-size:12px;color:var(--text-dim);">Plan d'action séquencé pour le salon — Convention Center, Washington DC.</p>
+    </div>
+    <div class="section-list" id="route-list"></div>
+
+    <h3 style="font-family:'JetBrains Mono';font-size:11px;text-transform:uppercase;color:var(--accent);letter-spacing:0.08em;margin:24px 12px 8px;">Scripts de pitch</h3>
+    <div class="section-list" id="scripts-list"></div>
+  </div>
+
+  <!-- STATS VIEW -->
+  <div class="view" id="view-stats">
+    <div style="padding: 16px 12px 4px;">
+      <h2 style="font-family:'Saira Condensed';font-weight:700;font-size:20px;letter-spacing:0.02em;margin-bottom:4px;">Tableau de bord</h2>
+      <p style="font-size:12px;color:var(--text-dim);" id="stats-subtitle">—</p>
+    </div>
+    <div class="stats-grid" id="stats-grid"></div>
+
+    <div class="section-list">
+      <h3>Activité récente</h3>
+      <div id="recent-activity"></div>
+    </div>
+
+    <div class="section-list">
+      <h3>Follow-ups en attente</h3>
+      <div id="followup-list"></div>
+    </div>
+
+    <div class="danger-zone">
+      <h3 style="font-family:'JetBrains Mono';font-size:11px;text-transform:uppercase;color:var(--text-dim);letter-spacing:0.08em;margin:0 0 10px;">Sauvegarde</h3>
+      <button class="btn primary" id="export-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Exporter données (JSON)
+      </button>
+      <button class="btn" id="import-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Importer (restaurer)
+      </button>
+      <input type="file" id="import-file" accept="application/json" style="display:none">
+      <button class="btn danger" id="clear-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Effacer toutes les notes
+      </button>
+    </div>
+  </div>
+
+</main>
+
+<!-- BOTTOM TABS -->
+<nav class="tabbar">
+  <div class="tab active" data-view="view-list">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"/><circle cx="12" cy="7" r="4"/></svg>
+    <span>Liste</span>
+  </div>
+  <div class="tab" data-view="view-plan">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21 3 6"/><line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/></svg>
+    <span>Plan</span>
+  </div>
+  <div class="tab" data-view="view-stats">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    <span>Stats</span>
+  </div>
+  <div class="tab" id="quick-search-tab">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <span>Search</span>
+  </div>
+</nav>
+
+<!-- DETAIL MODAL -->
+<div class="modal-backdrop" id="modal-backdrop"></div>
+<div class="modal" id="modal" role="dialog">
+  <div class="modal-handle"></div>
+  <div class="modal-header">
+    <div class="modal-header-info">
+      <h2 id="modal-title">—</h2>
+      <div class="subline" id="modal-subline"></div>
+    </div>
+    <button class="modal-close" id="modal-close" aria-label="Fermer">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="modal-body" id="modal-body"></div>
+</div>
+
+<!-- PHOTO FULLSCREEN -->
+<div class="photo-fullscreen" id="photo-fullscreen">
+  <button class="close" id="photo-close">×</button>
+  <img id="photo-fullscreen-img" alt="">
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =============================================
+   MDM 2026 — Field BD App
+   Single-file, GitHub-Pages-ready, mobile-first.
+   Storage: localStorage with image compression.
+   ============================================= */
+
+const SEED_DATA = {"targets":[{"id":"navy-marine-corps-small-tactical-uas-1","priority":"A","segment":"USMC/Acquisition","name":"Navy & Marine Corps Small Tactical UAS","location":"Booth 1012","activity":"Government org / Small Tactical UAS; listed under Government Organization, Intelligence Systems, Special Ops, UAS","who":"Program office / PMA-263 adjacent","products":"Sparrow; Startracker+curved sensor","angle":"Pitch Sparrow as compact ISR/vision payload for small tactical UAS; startracker as GNSS-denied/alt-PNT option","action":"Ask for 15-min PMA-263/PMA-266 intro + demo path","source":"PDF p.39, p.51, p.53, p.57"},{"id":"navair-2","priority":"A","segment":"USMC/Acquisition","name":"NAVAIR","location":"Booth 813","activity":"Naval aviation acquisition / programs","who":"UAS, PMA, aviation payload contacts","products":"Sparrow; Startracker+curved sensor; curved sensor","angle":"Find the right PMA owner for payload integration and aviation qualification path","action":"Ask who owns next UAS payload experiments and whether there is a BAA/OTA path","source":"PDF p.39, p.60"},{"id":"office-of-naval-research-onr-3","priority":"A","segment":"USMC/Acquisition","name":"Office of Naval Research (ONR)","location":"Booth 1543","activity":"Research org; listed in UAS, armored vehicles, anti-armor, crew-served weapons categories","who":"S&T / program managers","products":"Curved sensor; Startracker+curved sensor; Sparrow","angle":"Position curved sensor as enabling technology for SWaP/wide-FOV optics; request S&T evaluation route","action":"Ask for S&T topic / transition partner / lab eval process","source":"PDF p.39, p.46, p.57"},{"id":"marine-corps-warfighting-laboratory-mcwl-4","priority":"A","segment":"USMC/Acquisition","name":"Marine Corps Warfighting Laboratory (MCWL)","location":"Booth 1645","activity":"Warfighting lab / experiments; also has Experiments Division and Wargaming sessions","who":"Experiments Division; Wargaming Division","products":"Sparrow; Startracker+curved sensor","angle":"Pitch experimental demo: UAS/USV sensing, C-UAS optical cueing, GNSS-denied navigation","action":"Ask for experiment calendar and who owns 2026/2027 field demos","source":"PDF p.38, p.18, p.20, p.62"},{"id":"marine-innovation-unit-5","priority":"A","segment":"USMC/Innovation","name":"Marine Innovation Unit","location":"Booth 1849","activity":"Government innovation unit; listed under AI, Computer Software/IT, Consulting, EW","who":"Innovation officers / dual-use tech scouting","products":"Sparrow; curved sensor; Startracker+curved sensor","angle":"Position as dual-use compact sensing technology with fast prototype path","action":"Ask for innovation sprint / pilot / DIU-style route and which unit validates","source":"PDF p.38, p.46, p.51, p.52, p.62"},{"id":"marine-corps-systems-command-6","priority":"A","segment":"USMC/Acquisition","name":"Marine Corps Systems Command","location":"Booth 1013","activity":"Systems Command; listed under Command & Control, Systems Integration, Ammunition/Anti-armor/Tactical Gear","who":"MARCORSYSCOM / PM offices","products":"Sparrow; curved sensor","angle":"Pitch as integration-ready component / payload, not as science project","action":"Ask PM mapping: GBAD, MAGTF C2, CSS, TCE, Ground Systems","source":"PDF p.35, p.48, p.56"},{"id":"peo-land-systems-7","priority":"A","segment":"USMC/Acquisition","name":"PEO Land Systems","location":"Booths 707 / 141","activity":"Government org / PEO Land Systems; acquisition briefings include GBAD, AAA, LAV, Wargaming","who":"PEO LS / PM Ground Based Air Defense","products":"Sparrow; curved sensor","angle":"C-UAS cueing/tracking and vehicle/mast ISR payload; edge ISR for distributed forces","action":"Ask for PM GBAD contact and integration constraints","source":"PDF p.40, p.51, p.57, p.60"},{"id":"peo-digital-enterprise-services-8","priority":"A","segment":"USMC/Acquisition","name":"PEO Digital & Enterprise Services","location":"Booth 913","activity":"Government org / IT and digital services; has PEO Digital briefing","who":"PEO Digital / data & C2 contacts","products":"Sparrow data feed; edge processing; not primary hardware sell","angle":"Pitch sensor data integration into C2 / edge workflows","action":"Ask how to connect sensor outputs to MAGTF C2 / cloud / tactical networks","source":"PDF p.40, p.49"},{"id":"cdd-combat-development-integration-9","priority":"A","segment":"USMC/Concepts","name":"CDD – Combat Development & Integration","location":"Booth 1745","activity":"Combat Development & Integration unit in exhibitor list","who":"Capabilities Development contacts","products":"All three, especially Sparrow + curved sensor","angle":"Requirement shaping, capability development, future force discussion","action":"Ask who owns UAS/C-UAS/AI sensor requirements and test venues","source":"PDF p.29, p.62"},{"id":"maritime-expeditionary-warfare-mexw-10","priority":"A","segment":"USMC/Maritime","name":"Maritime Expeditionary Warfare (MExW)","location":"Booth 1863","activity":"Maritime Expeditionary Warfare org","who":"Maritime expeditionary warfare / OPNAV N95 adjacent contacts","products":"Sparrow; curved sensor","angle":"Maritime/littoral ISR, mast/USV sensing, expeditionary fleet use case","action":"Ask about littoral mobility and expeditionary fleet sensing gaps","source":"PDF p.38, p.62"},{"id":"magtf-training-command-11","priority":"A","segment":"USMC/Training","name":"MAGTF Training Command","location":"Booth 243","activity":"Training command / MAGTF training","who":"Training/evaluation contacts","products":"Sparrow demo; simulated sensor feed","angle":"Offer demo scenarios and sensor-to-training data package","action":"Ask how to get into training/evaluation exercises","source":"PDF p.35, p.57, p.60"},{"id":"aerovironment-av-12","priority":"A","segment":"UAS / Autonomy","name":"AeroVironment (AV)","location":"Booth 2215","activity":"UAS; ad highlights JUMP 20-X Group 3 VTOL UAS; listed in C2 and UAS categories","who":"Payload roadmap / business development","products":"Sparrow; curved sensor; Startracker+curved sensor","angle":"Sparrow as lightweight ISR payload; curved sensor for wide-FOV compact optics; startracker for GNSS-denied navigation","action":"Request payload integration contact + 30-min technical call","source":"PDF p.11, p.28, p.48, p.57"},{"id":"anduril-13","priority":"A","segment":"UAS / Autonomy","name":"Anduril","location":"Booth 1326","activity":"Aerospace/AI/Air Defense/C2/System Integration/UAS","who":"UAS autonomy / C2 / payload integration","products":"Sparrow; curved sensor; Startracker+curved sensor","angle":"Offer sensor/payload tech that improves edge ISR and autonomous cueing","action":"Ask which platform/payload owner handles new optical payloads","source":"PDF p.28, p.46, p.48, p.56, p.57"},{"id":"shield-ai-14","priority":"A","segment":"UAS / Autonomy","name":"Shield AI","location":"Booth 1607","activity":"Aerospace, Air Defense, Aviation/Fixed Wing, Security, UAS","who":"Autonomy / perception / UAS payload team","products":"Sparrow; Startracker+curved sensor","angle":"Sparrow as perception/ISR payload; startracker as alt-PNT / navigation aid","action":"Ask about sensor fusion stack and integration windows","source":"PDF p.42, p.46, p.47, p.55, p.57"},{"id":"skydio-15","priority":"A","segment":"UAS / Autonomy","name":"Skydio","location":"Booth 613","activity":"Intelligence Systems, Security, UAS/USV/UV","who":"National security product / payload/perception team","products":"Sparrow; curved sensor","angle":"Compact wide-FOV sensing for small drone ISR/perception","action":"Ask if custom payload integration is possible and who owns autonomy sensors","source":"PDF p.42, p.53, p.55, p.57-58"},{"id":"red-cat-holdings-16","priority":"A","segment":"UAS / Autonomy","name":"Red Cat Holdings","location":"Booth 2154","activity":"Combat Support Systems, C2, Security, UAS","who":"Payload / platform partnerships","products":"Sparrow; curved sensor","angle":"Tactical small UAS ISR payload, low-SWaP optics upgrade","action":"Ask about short-path payload evaluation and USMC UAS requirements","source":"PDF p.42, p.48, p.55, p.57"},{"id":"redwire-edge-autonomy-17","priority":"A","segment":"UAS / Autonomy","name":"Redwire / Edge Autonomy","location":"Booth 529","activity":"Ad highlights Stalker expeditionary Group 2 UAS; listed in Aerospace, C2, Imagery, Optics, UAS","who":"Stalker payload / engineering / BD","products":"Sparrow; curved sensor; Startracker+curved sensor","angle":"Sparrow as long-endurance ISR payload; curved sensor for optics; startracker for contested GPS use cases","action":"Ask for Stalker payload interface and roadmap owner","source":"PDF p.2, p.42, p.52, p.54, p.57"},{"id":"pdw-18","priority":"A","segment":"UAS / Autonomy","name":"PDW","location":"Booth 640","activity":"Drone demo participant; listed under UAS/UV and aviation/helicopter","who":"Drone demo team / payload owner","products":"Sparrow; Startracker+curved sensor","angle":"Payload demo for small drones and GNSS-denied/low-light sensing","action":"Attend demo, then request booth follow-up with engineering","source":"PDF p.26, p.40, p.57-58"},{"id":"near-earth-autonomy-19","priority":"A","segment":"UAS / Autonomy","name":"Near Earth Autonomy","location":"Booth 1421","activity":"Aerospace, AI, aviation logistics/helicopter, UAS; navigation/autonomy focus","who":"Autonomy / navigation / BD","products":"Startracker+curved sensor; Sparrow","angle":"Vision-based / star-tracker-grade navigation complement; Sparrow as sensing payload","action":"Ask about GNSS-denied autonomy sensors and integration constraints","source":"PDF p.39, p.46-47, p.57"},{"id":"general-atomics-aeronautical-20","priority":"A","segment":"UAS / Autonomy","name":"General Atomics Aeronautical","location":"Booth 2505","activity":"Aerospace, Air Defense, Aviation C2, Engineering, Radar Systems, UAS","who":"Payload integration / advanced concepts","products":"Sparrow; curved sensor; Startracker+curved sensor","angle":"Curved sensor for ISR payload evolution; startracker for navigation/pointing; Sparrow as demo payload","action":"Ask for advanced payload evaluation path","source":"PDF p.33, p.46-47, p.57"},{"id":"aevex-21","priority":"A","segment":"UAS / Autonomy","name":"AEVEX","location":"Booth 2255","activity":"Intelligence Systems, Loitering Munitions, UAS/USV/UV","who":"Payloads / UAS programs","products":"Sparrow; curved sensor","angle":"Compact imaging / ISR payload; possible co-dev around optics","action":"Ask who owns payload roadmaps for ISR and loitering systems","source":"PDF p.28, p.53, p.57-58"},{"id":"neros-technologies-22","priority":"A","segment":"UAS / Autonomy","name":"Neros Technologies","location":"Booth 821","activity":"Aerospace, comms, drone, loitering munitions, UAS","who":"Drone/platform team","products":"Sparrow; Startracker+curved sensor","angle":"Small drone sensing payload and alt-PNT/mission resilience angle","action":"Ask about payload swap / weight / power budgets","source":"PDF p.39, p.46, p.50, p.53, p.57"},{"id":"vector-23","priority":"A","segment":"UAS / Autonomy","name":"Vector","location":"Booth 449","activity":"Anti-Drone, Drone, Training, UAS/USV/UV","who":"Drone systems / training team","products":"Sparrow; curved sensor","angle":"Visual sensing payload and demo/training scenario integration","action":"Ask how they run flight demos and field evals","source":"PDF p.45, p.49, p.50, p.57-58"},{"id":"droneshield-llc-24","priority":"A","segment":"C-UAS / Air Defense","name":"DroneShield LLC","location":"Booth 2557","activity":"AI, Air Defense, EW, Security, UAS, UV","who":"C-UAS product / sensor fusion team","products":"Sparrow; curved sensor","angle":"Sparrow as EO/visual cueing/tracking layer to complement RF/radar; curved sensor for wide-FOV tracking","action":"Ask what optical sensor gap remains after RF/radar detection","source":"PDF p.32, p.46, p.50, p.55, p.57-58"},{"id":"fortem-technologies-25","priority":"A","segment":"C-UAS / Air Defense","name":"Fortem Technologies","location":"Booth 929","activity":"Aerospace, Air Defense, Anti-Drone, Security, Drone/UAS","who":"C-UAS / radar-to-interceptor team","products":"Sparrow; curved sensor","angle":"Wide-FOV EO cueing, classification and tracking for C-UAS","action":"Ask about sensor fusion pain points and classification false alarms","source":"PDF p.32, p.46, p.50, p.55, p.57"},{"id":"epirus-26","priority":"A","segment":"C-UAS / Air Defense","name":"Epirus","location":"Booth 942","activity":"Air Defense, Anti-Drone, EW, Expeditionary Power, Modeling & Simulation","who":"C-UAS / effects integration","products":"Sparrow; curved sensor","angle":"EO cueing/tracking layer feeding high-power microwave effects; demo-level integration","action":"Ask where visual tracking improves C-UAS kill chain","source":"PDF p.32, p.46, p.50, p.54"},{"id":"echodyne-corp-27","priority":"A","segment":"C-UAS / Air Defense","name":"Echodyne Corp","location":"Booth 2355","activity":"Radar/counter-drone ecosystem; exhibitor list booth 2355","who":"Radar/sensor fusion team","products":"Sparrow; curved sensor","angle":"Complement radar with compact optical classification / track ID","action":"Ask about radar + EO fusion architecture","source":"PDF p.32, p.64"},{"id":"mydefence-north-america-llc-28","priority":"A","segment":"C-UAS / Air Defense","name":"MyDefence (North America) LLC","location":"Booth 509","activity":"Anti-Drone, EW, Security","who":"C-UAS / EW team","products":"Sparrow; curved sensor","angle":"EO layer for drone classification and tracking in RF-contested settings","action":"Ask if they use external EO payloads or only internal sensors","source":"PDF p.38, p.49-50, p.55, p.60"},{"id":"walaris-29","priority":"A","segment":"C-UAS / Air Defense","name":"Walaris","location":"Booth 2905","activity":"AI, Air Defense, C2, Computer Software, Security","who":"AI/C-UAS analytics team","products":"Sparrow","angle":"Sparrow as high-quality edge sensor feed for AI drone detection/classification","action":"Ask if they need sensor data partners for detection algorithms","source":"PDF p.45, p.46, p.48-49, p.55"},{"id":"parazero-30","priority":"B","segment":"C-UAS / Air Defense","name":"ParaZero","location":"Booth 947","activity":"Aerospace, Air Defense, Anti-Drone, Combat Support, Security","who":"Drone safety / C-UAS partnership","products":"Sparrow","angle":"Secondary: payload/safety integration discussions","action":"Ask if payload constraints or safety systems limit sensor integration","source":"PDF p.40, p.46, p.49, p.55"},{"id":"thunderbolt-solutions-31","priority":"B","segment":"C-UAS / Air Defense","name":"Thunderbolt Solutions","location":"Booth 2754","activity":"Anti-Drone, Systems Integration, UAS/USV/UV","who":"C-UAS / integration team","products":"Sparrow","angle":"Sensor integration and evaluation partner","action":"Ask if they integrate third-party EO/AI sensor payloads","source":"PDF p.43, p.49, p.56, p.57-58"},{"id":"tycho-ai-32","priority":"B","segment":"C-UAS / Air Defense","name":"Tycho.AI","location":"Booth 1361","activity":"AI, Anti-Drone, Navigational Systems, UAS","who":"AI / anti-drone team","products":"Sparrow; Startracker+curved sensor","angle":"Sensor data source for AI detection; navigation use case","action":"Ask about training data needs and edge deployment","source":"PDF p.44, p.46, p.49, p.54, p.57"},{"id":"teledyne-flir-33","priority":"A","segment":"EO/IR / Optics","name":"Teledyne FLIR","location":"Booth 1724","activity":"UAS, binoculars, optics, night vision devices, scopes/sights","who":"EO/IR product / partnerships","products":"Curved sensor; Sparrow","angle":"Curved sensor component/licensing to reduce optics complexity; Sparrow as complementary payload if not competitive","action":"Lead with curved sensor, not a full competing camera product","source":"PDF p.43, p.50, p.54-55, p.57"},{"id":"elbit-america-34","priority":"A","segment":"EO/IR / Optics","name":"Elbit America","location":"Booth 1037","activity":"C2, EW, missile systems, night vision, optics","who":"EO/IR / night vision / ISR team","products":"Curved sensor; Sparrow; Startracker+curved sensor","angle":"Curved sensor for compact wide-field EO/night vision; Sparrow as UAS/vehicle ISR payload","action":"Ask for product line owner, not general BD","source":"PDF p.32, p.48, p.50, p.53-54"},{"id":"l3harris-technologies-35","priority":"A","segment":"EO/IR / Optics","name":"L3Harris Technologies","location":"Booth 2225","activity":"C2, communications, EW, radar, night vision; sponsor","who":"Sensors/night vision / USN-USMC accounts","products":"Curved sensor; Sparrow; Startracker+curved sensor","angle":"Curved sensor as enabling tech for low-SWaP EO; Sparrow as mission payload; startracker for pointing/PNT","action":"Ask for EO/night vision innovation or DARPA/lab contact","source":"PDF p.35, p.49-50, p.54, p.66"},{"id":"leonardo-drs-36","priority":"A","segment":"EO/IR / Optics","name":"Leonardo DRS","location":"Booth 1444","activity":"C2, EW, expeditionary power, intelligence, night vision","who":"EO/IR / systems team","products":"Curved sensor; Sparrow","angle":"Optical payload component or complete ISR payload integration","action":"Ask about EO/IR roadmap gaps in wide-FOV/SWaP","source":"PDF p.35, p.48, p.50, p.53-54"},{"id":"safran-defense-space-inc-37","priority":"A","segment":"EO/IR / Optics","name":"Safran Defense & Space, Inc.","location":"Booth 610","activity":"Lasers, Navigational Systems, Optics, Test/Measurement","who":"Navigation / optics / space-defense team","products":"Startracker+curved sensor; curved sensor","angle":"Best target for curved sensor + startracker co-development/qualification","action":"Ask for optical payload/nav sensor product line owner","source":"PDF p.42, p.53-54, p.57"},{"id":"maven-optics-38","priority":"A","segment":"EO/IR / Optics","name":"Maven Optics","location":"Booth 2649","activity":"Binoculars, optics, scopes/sights","who":"Optics product / engineering","products":"Curved sensor","angle":"Co-design optics around a curved focal plane; wide-FOV/SWaP","action":"Ask if they do custom defense optics or only catalog optics","source":"PDF p.38, p.50, p.54-55"},{"id":"envision-technology-llc-39","priority":"B","segment":"EO/IR / Optics","name":"Envision Technology, LLC","location":"Booth 1462","activity":"Lasers, night vision, scopes/sights, USV/UV","who":"Optics / imaging product team","products":"Curved sensor; Sparrow","angle":"Curved sensor for compact night vision/sighting optics; Sparrow for platform payloads","action":"Ask about custom sensor integration openness","source":"PDF p.32, p.53-55, p.58"},{"id":"nvts-night-vision-technology-solutions-i-40","priority":"B","segment":"EO/IR / Optics","name":"NVTS Night Vision Technology Solutions Inc","location":"Booth 1323","activity":"Night vision technology exhibitor","who":"Night vision product team","products":"Curved sensor","angle":"Curved sensor for wide-FOV night vision optics / edge performance","action":"Ask who evaluates new detector/sensor formats","source":"PDF p.39, p.61"},{"id":"ird-glass-41","priority":"B","segment":"EO/IR / Optics","name":"IRD Glass","location":"Booth 1520","activity":"Lasers, medical, optics, test/measurement equipment","who":"Optics / test / glass engineering","products":"Curved sensor","angle":"Partnership/supply chain: optics and characterization for curved sensor prototypes","action":"This is more partner/supplier than buyer","source":"PDF p.34, p.53-54, p.57"},{"id":"irradiant-technologies-42","priority":"B","segment":"EO/IR / Optics","name":"Irradiant Technologies","location":"Booth 549","activity":"Exhibitor in optical/tech cluster; booth index","who":"Optics / photonics engineering","products":"Curved sensor","angle":"Co-development / micro-optics around curved focal plane","action":"Use as technical partner prospect, not sales target first","source":"PDF p.34, p.60"},{"id":"kor-technik-43","priority":"B","segment":"EO/IR / Optics","name":"KOR Technik","location":"Booth 1024","activity":"Optics, scopes/sights, photography, individual equipment, special ops","who":"Optics / tactical integration team","products":"Curved sensor; Sparrow","angle":"Curved sensor for compact tactical optics; Sparrow if they integrate camera payloads","action":"Ask if they work on camera/EO devices or only accessories","source":"PDF p.34, p.54-56"},{"id":"vectornav-technologies-44","priority":"A","segment":"Alt-PNT / Navigation","name":"VectorNav Technologies","location":"Booth 2460","activity":"Navigational Systems; also booth list","who":"Navigation / inertial systems team","products":"Startracker+curved sensor","angle":"Startracker as optical aiding layer for GNSS-denied navigation; complementary to INS","action":"Ask about sensor fusion interfaces and target platforms","source":"PDF p.45, p.54, p.64"},{"id":"inertial-labs-viavi-45","priority":"A","segment":"Alt-PNT / Navigation","name":"Inertial Labs (VIAVI)","location":"Booth 1148","activity":"Exhibitor list; booth index; inertial/navigation provider","who":"INS/GNSS team","products":"Startracker+curved sensor","angle":"Optical/star-tracker aiding for INS in GNSS-denied conditions","action":"Ask whether they integrate third-party optical aids","source":"PDF p.34, p.61"},{"id":"psionic-46","priority":"A","segment":"Alt-PNT / Navigation","name":"Psionic","location":"Booth 2910","activity":"Navigational Systems","who":"Navigation product / BD","products":"Startracker+curved sensor","angle":"Complementary optical navigation / ranging / attitude sensing discussion","action":"Ask about platform use cases where startracker-grade accuracy matters","source":"PDF p.40, p.54, p.65"},{"id":"trx-systems-47","priority":"B","segment":"Alt-PNT / Navigation","name":"TRX Systems","location":"Booth 2650","activity":"C2, communications, EW, individual equipment, navigational systems","who":"PNT / navigation team","products":"Startracker+curved sensor","angle":"Position startracker as complementary high-accuracy optical reference for platform-level PNT","action":"Ask if product line is personnel-only or platform-capable","source":"PDF p.44, p.48-49, p.52, p.54"},{"id":"pacific-defense-48","priority":"B","segment":"Alt-PNT / Navigation","name":"Pacific Defense","location":"Booth 2561","activity":"C2, EW, Navigational Systems, Systems Integration","who":"EW/navigation integration team","products":"Startracker+curved sensor; Sparrow","angle":"Alt-PNT in EW/GNSS-denied environments and sensor integration","action":"Ask about C5ISR programs and EW-resilient navigation needs","source":"PDF p.39, p.48, p.50, p.54, p.56"},{"id":"mistral-group-49","priority":"B","segment":"Alt-PNT / Navigation","name":"Mistral Group","location":"Booth 2337","activity":"Air Defense, Navigational Systems, Special Ops, UAS","who":"Navigation / UAS / special ops team","products":"Startracker+curved sensor; Sparrow","angle":"Alt-PNT and tactical ISR payload for UAS/special ops","action":"Ask for integration partner role and customer use cases","source":"PDF p.38, p.46, p.54-55, p.57"},{"id":"airbus-u-s-space-defense-inc-50","priority":"A","segment":"Space / Satcom","name":"AIRBUS U.S. Space & Defense, Inc.","location":"Booth 1437","activity":"Aerospace, C2, communications, IT, systems integration","who":"Space/defense BD / sensor platform team","products":"Startracker+curved sensor; curved sensor","angle":"Direct space sell: startracker and curved sensor as payload/sensor tech","action":"Ask for space payload/sensor product owner","source":"PDF p.28, p.48-49, p.52, p.56"},{"id":"galt-aerospace-51","priority":"A","segment":"Space / Satcom","name":"GALT Aerospace","location":"Booth 1359","activity":"Aerospace, aviation C2, communications, engineering","who":"Aerospace engineering / payload team","products":"Startracker+curved sensor; Sparrow","angle":"Integration partner for avionics/payloads; alt-PNT and compact ISR","action":"Ask about defense aircraft/UAS payload opportunities","source":"PDF p.32, p.46-48, p.50"},{"id":"viasat-inc-52","priority":"B","segment":"Space / Satcom","name":"Viasat Inc.","location":"Booth 1313","activity":"C2, communications, computer software/IT, security","who":"Defense satcom / data architecture team","products":"Sparrow data integration; Startracker only secondary","angle":"Pitch is NOT hardware sale first: sensor data moving over contested networks","action":"Ask about edge sensor data formats and tactical network constraints","source":"PDF p.45, p.48-49, p.52, p.55"},{"id":"eutelsat-network-solutions-53","priority":"B","segment":"Space / Satcom","name":"Eutelsat Network Solutions","location":"Booth 2162","activity":"Aerospace, C2, communications, disaster recovery, intelligence systems","who":"Defense satcom / network solutions team","products":"Sparrow data feed; Startracker secondary","angle":"Sensor data backhaul / resilient comms story","action":"Ask if they seek ISR payload partners for demonstrations","source":"PDF p.32, p.46, p.48-50, p.53"},{"id":"idirect-government-54","priority":"B","segment":"Space / Satcom","name":"iDirect Government","location":"Booth 510","activity":"Government satcom / comms provider","who":"Defense satcom team","products":"Sparrow data feed","angle":"Position sensor output transport, not core product sale","action":"Ask how small UAS ISR payload data is routed over satcom","source":"PDF p.34, p.60"},{"id":"orbit-communication-systems-inc-55","priority":"B","segment":"Space / Satcom","name":"Orbit Communication Systems Inc.","location":"Booth 1049","activity":"Communications systems exhibitor","who":"Comms systems / antennas team","products":"Startracker+curved sensor only if space/pointing relevant; otherwise Sparrow data","angle":"Find whether they have space/airborne pointing needs","action":"Ask if optical pointing/nav sensing is relevant to their antenna roadmap","source":"PDF p.39, p.61"},{"id":"lockheed-martin-56","priority":"A","segment":"Prime / Integrator","name":"Lockheed Martin","location":"Booth 1127","activity":"Aerospace, artillery, C2, missiles, aviation","who":"Advanced programs / sensors / UAS integrators","products":"All three","angle":"Use account-mapping: find the exact program buyer; no generic pitch","action":"Ask for sensor payload owner in UAS, missiles, maritime ISR, or space","source":"PDF p.35, p.46-48, p.53"},{"id":"northrop-grumman-corporation-57","priority":"A","segment":"Prime / Integrator","name":"Northrop Grumman Corporation","location":"Booth 1937","activity":"C2, comms, EW, navigational systems, radar systems","who":"Navigation/sensors/radar/ISR team","products":"Startracker+curved sensor; curved sensor; Sparrow","angle":"Startracker/curved sensor strongest; Sparrow if they own UAS/ISR payload work","action":"Ask for advanced sensing/nav technology insertion contacts","source":"PDF p.39, p.48-50, p.54-55"},{"id":"rtx-58","priority":"A","segment":"Prime / Integrator","name":"RTX","location":"Booth 2237","activity":"Aerospace, air defense, artillery, C2, missiles, radar, UAS","who":"Sensors/air defense/missile/UAS teams","products":"Curved sensor; Startracker+curved sensor; Sparrow","angle":"Curved sensor for seekers/EO/ISR; startracker for nav/pointing; Sparrow for payload demo","action":"Ask which business unit handles EO sensors/UAS payloads","source":"PDF p.42, p.46-48, p.53-57"},{"id":"bae-systems-59","priority":"A","segment":"Prime / Integrator","name":"BAE Systems","location":"Booth 2527","activity":"Air defense, armored vehicles, assault amphibian, missiles, ordnance","who":"Air defense / platform integration team","products":"Sparrow; curved sensor","angle":"C-UAS/vehicle ISR sensor, wide-FOV EO payload","action":"Ask about vehicle/mast sensor integration and supplier qualification","source":"PDF p.29, p.46-49, p.53-54"},{"id":"kongsberg-60","priority":"A","segment":"Prime / Integrator","name":"KONGSBERG","location":"Booth 2315","activity":"Air Defense, combat support, assault amphibian programs, missiles, crew-served weapons; sponsor","who":"US defense / system integration team","products":"Sparrow; curved sensor","angle":"Sensor/cueing layer for remote weapon stations / air defense / maritime surveillance","action":"Ask for sensor ecosystem owner and USMC accounts lead","source":"PDF p.5, p.34, p.46-50, p.53"},{"id":"rafael-advanced-defense-systems-61","priority":"A","segment":"Prime / Integrator","name":"Rafael Advanced Defense Systems","location":"Booth 1137","activity":"Air defense, anti-armor, armor, missile systems","who":"Air defense/missile systems BD","products":"Curved sensor; Sparrow","angle":"EO cueing/tracking/seekers; Sparrow as demo sensor layer","action":"Ask about US partner/integration routes and C-UAS sensor gaps","source":"PDF p.40, p.46-49, p.53"},{"id":"saab-inc-62","priority":"A","segment":"Prime / Integrator","name":"Saab, Inc.","location":"Booth 1337","activity":"Anti-armor, EW, modeling/simulation, radar, weapons training","who":"Sensors/radar/EW/team","products":"Curved sensor; Sparrow","angle":"Optical sensor complement for radar/EW/C-UAS; curved sensor for compact wide field","action":"Ask who owns EO sensor partnerships","source":"PDF p.42, p.46, p.50, p.54-58"},{"id":"textron-systems-63","priority":"A","segment":"Prime / Integrator","name":"Textron Systems","location":"Booth 1824","activity":"C2, mine countermeasures, systems integration, vehicles, UAS/USV","who":"UAS/USV/platform integration","products":"Sparrow; curved sensor","angle":"Payload for UAS/USV/vehicles, maritime ISR","action":"Ask about payload modularity and open interfaces","source":"PDF p.43, p.48, p.53, p.56-58"},{"id":"leidos-64","priority":"A","segment":"Prime / Integrator","name":"Leidos","location":"Booth 1947","activity":"Ground logistics, IT, UAS/USV/UV, integrator","who":"DoD integrator / smart data team","products":"Sparrow; curved sensor; Startracker+curved sensor","angle":"Integration partner and data/AI route; sell demo package not just component","action":"Ask for internal capture/program contacts in USMC UAS/C5ISR","source":"PDF p.35, p.52, p.57-58, p.65"},{"id":"booz-allen-hamilton-65","priority":"B","segment":"Prime / Integrator","name":"Booz Allen Hamilton","location":"Booth 2843","activity":"AI, C2, consulting, maritime/pre-positioning, wargaming","who":"USMC account / digital engineering / innovation team","products":"Sparrow demo; curved sensor technical dossier","angle":"Partner for requirements, pilots, and acquisition navigation","action":"Ask who supports USMC innovation / UAS-CUAS portfolios","source":"PDF p.29, p.46, p.48, p.50, p.58"},{"id":"caci-international-inc-66","priority":"B","segment":"Prime / Integrator","name":"CACI International Inc","location":"Booth 1025","activity":"Exhibitor list; major defense integrator","who":"ISR/C5ISR capture team","products":"Sparrow; curved sensor","angle":"USMC C5ISR integration and sensor-data programs","action":"Ask for USMC C5ISR program capture owner","source":"PDF p.29, p.61"},{"id":"kbr-67","priority":"B","segment":"Prime / Integrator","name":"KBR","location":"Booth 849","activity":"KBR hosts MBSE briefing; systems engineering / acquisition support","who":"Systems engineering / business development","products":"Curved sensor; Startracker+curved sensor","angle":"MBSE/design-study route for sensor integration","action":"Ask for design study / MBSE evaluation contact","source":"PDF p.24, p.34, p.61"},{"id":"hii-68","priority":"B","segment":"Prime / Integrator","name":"HII","location":"Booth 2149","activity":"Engineering, M&S, USV/UV, supply chain","who":"Naval/maritime autonomy team","products":"Sparrow; curved sensor","angle":"Maritime/USV ISR and autonomy sensing payload","action":"Ask for unmanned systems / Mission Technologies contact","source":"PDF p.33, p.54, p.58"},{"id":"general-dynamics-mission-systems-69","priority":"B","segment":"Prime / Integrator","name":"General Dynamics Mission Systems","location":"Booth 2113","activity":"C2, communications, IT, intelligence systems","who":"C4ISR / comms / mission systems team","products":"Sparrow data feed; Startracker+curved sensor","angle":"Sensor-to-C2 integration; alt-PNT for platforms","action":"Ask about open architecture integration opportunities","source":"PDF p.33, p.48-53"},{"id":"cubic-defense-70","priority":"B","segment":"Prime / Integrator","name":"Cubic Defense","location":"Booth 1807","activity":"C2, software, IT, intelligence systems, training","who":"C2/training systems team","products":"Sparrow data; simulation feed","angle":"Sensor feed for training/C2 and demo scenarios","action":"Ask how third-party sensors enter training/C2 stack","source":"PDF p.30, p.48-53"},{"id":"kratos-71","priority":"B","segment":"Prime / Integrator","name":"Kratos","location":"Booth 2025","activity":"M&S, training, training vehicles, weapons training","who":"Training/M&S or UAS-adjacent team","products":"Sparrow demo; curved sensor","angle":"Simulation/training integration for sensor payload evaluation","action":"Ask for unmanned/test range evaluation paths","source":"PDF p.37, p.54, p.57-58"},{"id":"sea-machines-robotics-72","priority":"A","segment":"Maritime / USV","name":"Sea Machines Robotics","location":"Booth 2456","activity":"USV / maritime robotics","who":"USV autonomy/product team","products":"Sparrow; curved sensor","angle":"Maritime perception/ISR payload; curved sensor for wide-FOV situational awareness","action":"Ask about camera payload specs and autonomy sensors","source":"PDF p.42, p.58"},{"id":"seasats-73","priority":"A","segment":"Maritime / USV","name":"Seasats","location":"Booth 2454","activity":"USV / unmanned maritime systems","who":"USV platform team","products":"Sparrow; curved sensor","angle":"Compact maritime sensing payload for USV surveillance","action":"Ask payload bay, power, data link, ruggedization constraints","source":"PDF p.42, p.64"},{"id":"hydronalix-74","priority":"B","segment":"Maritime / USV","name":"Hydronalix","location":"Booth 1119","activity":"Maritime robotics / unmanned systems exhibitor","who":"USV/UxS product team","products":"Sparrow","angle":"USV/boatborne ISR payload","action":"Ask if they support third-party sensors","source":"PDF p.33, p.61"},{"id":"vatn-systems-75","priority":"B","segment":"Maritime / USV","name":"Vatn Systems","location":"Booth 646","activity":"Unmanned/maritime systems exhibitor","who":"Maritime autonomy team","products":"Sparrow; curved sensor","angle":"Maritime sensing payload, ISR/cueing","action":"Ask about platform payload integration","source":"PDF p.45, p.60"},{"id":"overland-ai-76","priority":"B","segment":"Ground / Vehicle","name":"Overland AI","location":"Booth 1243","activity":"Autonomy / ground systems; exhibitor and booth index","who":"UGV/autonomy perception team","products":"Sparrow; curved sensor","angle":"Ground vehicle perception/ISR payload with compact optics","action":"Ask sensor stack pain points in austere terrain","source":"PDF p.39, p.61"},{"id":"oshkosh-defense-77","priority":"B","segment":"Ground / Vehicle","name":"Oshkosh Defense","location":"Booth 2307","activity":"Vehicles, combat systems, USV/UV","who":"Vehicle integration team","products":"Sparrow; curved sensor","angle":"Vehicle mast/perimeter ISR sensor; autonomy perception","action":"Ask which vehicle programs accept new EO sensors","source":"PDF p.39-40, p.58"},{"id":"am-general-78","priority":"B","segment":"Ground / Vehicle","name":"AM General","location":"Booth 2007","activity":"Vehicles, armored combat, training systems vehicles","who":"Vehicle systems team","products":"Sparrow","angle":"Vehicle ISR/mast payload; rugged integration","action":"Ask about sensor power/mount/data interfaces","source":"PDF p.28, p.49, p.57-58"},{"id":"polaris-government-defense-79","priority":"B","segment":"Ground / Vehicle","name":"Polaris Government & Defense","location":"Booth 1637","activity":"Vehicles, special ops, training","who":"Light tactical vehicle team","products":"Sparrow","angle":"Light vehicle ISR kit / portable sensor payload","action":"Ask for field demo path with SOF/USMC users","source":"PDF p.40, p.55, p.57-58"},{"id":"turbineone-80","priority":"B","segment":"AI / C2 / Data","name":"TurbineOne","location":"Booth 2812","activity":"AI, anti-drone, UAS/USV, edge-based warfighting speaker","who":"Edge AI / USMC BD","products":"Sparrow","angle":"Sparrow as sensor input to edge AI / C-UAS classification","action":"Ask for data/SDK/API integration and demo scenario","source":"PDF p.44, p.46, p.49, p.57-58"},{"id":"applied-intuition-81","priority":"B","segment":"AI / C2 / Data","name":"Applied Intuition","location":"Booth 2819","activity":"Exhibitor; autonomy simulation/software","who":"Autonomy simulation / validation team","products":"Sparrow data; curved sensor simulation model","angle":"Use for validation/simulation of new sensor model","action":"Ask if they model custom sensors for autonomy testing","source":"PDF p.28, p.64"},{"id":"onebrief-82","priority":"B","segment":"AI / C2 / Data","name":"Onebrief","location":"Booth 1959","activity":"Wargaming / software; sponsor of OBJ 1 Wargaming","who":"Ops planning / wargaming team","products":"Sparrow data feed","angle":"Sensor-to-decision / planning visibility; not primary hardware buyer","action":"Ask how to include real sensor feeds in planning/wargaming","source":"PDF p.39, p.58, p.66"},{"id":"battle-road-digital-83","priority":"B","segment":"AI / C2 / Data","name":"Battle Road Digital","location":"Booth 843","activity":"Software, training, modeling/simulation, wargaming","who":"Wargaming / simulation team","products":"Sparrow demo feed; curved sensor model","angle":"Demo integration into simulation and operational decision support","action":"Ask about ingesting sensor outputs in scenario tools","source":"PDF p.29, p.49, p.54, p.58"},{"id":"esri-84","priority":"B","segment":"AI / C2 / Data","name":"Esri","location":"Booth 2355","activity":"C2, IT, intelligence systems, M&S","who":"Defense geospatial team","products":"Sparrow data feed","angle":"Geospatial exploitation of sensor tracks/images","action":"Ask for ISR data workflow and partner programs","source":"PDF p.32, p.48-54"},{"id":"systematic-85","priority":"B","segment":"AI / C2 / Data","name":"Systematic","location":"Booth 2427","activity":"C2, software, IT, EW, systems integration","who":"C2/BMS team","products":"Sparrow data feed","angle":"Sensor data integration into C2/common operating picture","action":"Ask about open APIs and partner integration","source":"PDF p.42, p.48-50, p.56"},{"id":"cambridge-pixel-86","priority":"B","segment":"AI / C2 / Data","name":"Cambridge Pixel","location":"Booth 2361","activity":"Radar systems, air defense, C2, software, USV","who":"Radar/C2 software team","products":"Sparrow","angle":"Sensor fusion: radar + optical track/classification","action":"Ask about optical data integration with radar tracks","source":"PDF p.29, p.46, p.48-50, p.57"},{"id":"vannevar-87","priority":"B","segment":"AI / C2 / Data","name":"Vannevar","location":"Booth 1460","activity":"AI/EW/computer software/IT/wargaming/maritime","who":"AI / defense software team","products":"Sparrow data feed","angle":"Sensor-derived intelligence for AI analytics; not hardware sale first","action":"Ask if they need sensor data partners for operational products","source":"PDF p.45, p.46, p.50, p.53, p.58"},{"id":"govini-88","priority":"B","segment":"AI / C2 / Data","name":"Govini","location":"Booth 719","activity":"Exhibitor list / data-intelligence platform","who":"Data/market intelligence team","products":"Market/partner intel; not product sale first","angle":"Use for market intelligence / program mapping, not a main sales target","action":"Ask for USMC UAS/C-UAS program insight if relevant","source":"PDF p.33, p.60"},{"id":"amazon-web-services-89","priority":"B","segment":"Cloud / Edge","name":"Amazon Web Services","location":"Booth 1150","activity":"Cloud/defense; sponsor/exhibitor","who":"Edge/cloud defense partnerships","products":"Sparrow data / edge compute pipeline","angle":"Partner route for processing Sparrow sensor data at edge/cloud","action":"Ask about defense edge reference architectures for ISR payloads","source":"PDF p.28, p.61"},{"id":"microsoft-federal-90","priority":"B","segment":"Cloud / Edge","name":"Microsoft Federal","location":"Booth 2954","activity":"Cloud/mission cloud; AI/air defense/software/IT","who":"Federal cloud / edge team","products":"Sparrow data / edge AI","angle":"Sensor-to-cloud/edge workflow; partner rather than buyer","action":"Ask about Azure Mission Cloud / tactical edge partner route","source":"PDF p.38, p.46, p.49, p.53"},{"id":"dell-technologies-91","priority":"B","segment":"Cloud / Edge","name":"Dell Technologies","location":"Booth 1213","activity":"Computer hardware/software; sponsor","who":"Rugged edge compute / federal team","products":"Sparrow + edge compute bundle","angle":"Bundle sensor + rugged edge processing","action":"Ask for rugged edge partners in USMC ISR","source":"PDF p.30, p.49-50, p.66"},{"id":"cisco-92","priority":"B","segment":"Cloud / Edge","name":"Cisco","location":"Booth 1420","activity":"C2, communications, IT, security","who":"Defense networking team","products":"Sparrow data transport","angle":"Data/network integration for ISR payloads, not sensor sale first","action":"Ask about tactical network constraints for video/AI feeds","source":"PDF p.30, p.48-52, p.55"},{"id":"carahsoft-technology-corp-93","priority":"B","segment":"Cloud / Edge","name":"Carahsoft Technology Corp.","location":"Booth 1144","activity":"Federal IT/channel; listed in AI, air defense, hardware/software/computers","who":"Channel / government acquisition","products":"All three as channel packaging","angle":"Use as US public-sector channel, contract vehicle mapping","action":"Ask what vehicle/channel fits sensor/hardware/software offering","source":"PDF p.29, p.46, p.49-50"}],"sessions":[{"id":"col-scott-shadforth-1","priority":"A","date":"Tue Apr 28","time":"10:15–10:55","location":"Acquisitions Pavilion Stage","person":"Col. Scott Shadforth","org":"PMA XMA-ADT","topic":"XMA-ADT Expeditionary Maritime Aviation Advanced Development Team","products":"Startracker+curved sensor; Sparrow","why":"Ask for maritime aviation experiment/payload route","source":"PDF p.22"},{"id":"col-erick-clark-2","priority":"A","date":"Tue Apr 28","time":"11:00–11:40","location":"Acquisitions Pavilion Stage","person":"Col. Erick Clark","org":"PM Ground Based Air Defense / Future Ops","topic":"PM Ground Based Air Defense: fielding counter-air capabilities","products":"Sparrow; curved sensor","why":"C-UAS cueing/tracking; ask for PM GBAD integration path","source":"PDF p.22"},{"id":"mr-greg-skinner-3","priority":"A","date":"Tue Apr 28","time":"11:45–12:25","location":"Acquisitions Pavilion Stage","person":"Mr. Greg Skinner","org":"PMA-263","topic":"Small Tactical Unmanned Air Systems","products":"Sparrow; curved sensor; Startracker+curved sensor","why":"Small UAS payload/alt-PNT path; request follow-up","source":"PDF p.22"},{"id":"col-leigh-irwin-4","priority":"A","date":"Tue Apr 28","time":"13:05–13:35","location":"Acquisitions Pavilion Stage","person":"Col. Leigh Irwin","org":"PMA-266","topic":"Multi-Mission Tactical Unmanned Air Systems","products":"Sparrow; Startracker+curved sensor","why":"Multi-mission UAS payload and GNSS-denied nav pitch","source":"PDF p.22"},{"id":"mr-john-mithun-5","priority":"A","date":"Tue Apr 28","time":"15:30–16:10","location":"Acquisitions Pavilion Stage","person":"Mr. John Mithun","org":"PM Tactical Communications and Electromagnetic Warfare Systems","topic":"Communications Modularity on the Battlefield","products":"Sparrow data feed; Startracker secondary","why":"Ask how sensor data survives EW/communications constraints","source":"PDF p.22"},{"id":"col-andrew-konicki-maj-joseph-radich-cwo-6","priority":"A","date":"Tue Apr 28","time":"13:10–13:50","location":"Warfighting Pavilion","person":"Col. Andrew Konicki / Maj. Joseph Radich / CWO5 Jeremy Stover","org":"PEO Land Systems / USMC Installation Command / CDD","topic":"Counter UAS: organic protection for distributed forces","products":"Sparrow; curved sensor","why":"Best C-UAS session. Ask for optical sensor gap and GBAD evaluation route","source":"PDF p.16"},{"id":"col-jeffrey-van-bourgondien-7","priority":"A","date":"Wed Apr 29","time":"12:30–13:10","location":"Acquisitions Pavilion Stage","person":"Col. Jeffrey Van Bourgondien","org":"PM MAGTF C2","topic":"Marine Air/Ground Task Force Command and Control Progression","products":"Sparrow data feed","why":"Get C2 integration/API pathway for sensor outputs","source":"PDF p.23"},{"id":"col-craig-clarkson-8","priority":"A","date":"Wed Apr 29","time":"13:15–13:55","location":"Acquisitions Pavilion Stage","person":"Col. Craig Clarkson","org":"MCTSSA","topic":"Marine Corps Tactical Systems Support Activity","products":"Sparrow data feed; integration test","why":"Ask for lab/interoperability testing path","source":"PDF p.23"},{"id":"col-kenneth-jones-9","priority":"A","date":"Wed Apr 29","time":"13:00–13:40","location":"Warfighting Pavilion","person":"Col. Kenneth Jones","org":"Science & Technology Division Director","topic":"Autonomy / Collaborative Autonomy / Autonomy Afloat","products":"Sparrow; Startracker+curved sensor","why":"Autonomy payload and alt-PNT discussion","source":"PDF p.16"},{"id":"maj-michael-zbonack-10","priority":"A","date":"Wed Apr 29","time":"13:10–13:50","location":"Marine Zone Stage","person":"Maj. Michael Zbonack","org":"HQMC Aviation, Cunningham Group","topic":"Wingmen of the Future: Uncrewed and Autonomous","products":"Sparrow; Startracker+curved sensor","why":"Future UAS concepts; ask for aviation roadmap owner","source":"PDF p.20"},{"id":"col-erick-clark-11","priority":"A","date":"Wed Apr 29","time":"14:40–15:20","location":"Marine Zone Stage","person":"Col. Erick Clark","org":"Future Operations, Plans, Policies and Operations","topic":"GCE UAS/C-UAS Symposium Outbrief","products":"Sparrow; curved sensor","why":"Attend/approach after: requirements from UAS/C-UAS symposium","source":"PDF p.20"},{"id":"lt-gen-william-h-swan-col-richard-rusnok-12","priority":"A","date":"Wed Apr 29","time":"15:15–16:15","location":"Main Briefing Center","person":"Lt. Gen. William H. Swan / Col. Richard Rusnok","org":"Deputy Commandant for Aviation / Cunningham Group","topic":"Ready Today, Unmatched Tomorrow: Future of Marine Aviation","products":"Sparrow; Startracker+curved sensor","why":"High-level aviation requirements and networking","source":"PDF p.15"},{"id":"col-michael-mccarthy-13","priority":"B","date":"Wed Apr 29","time":"13:30–14:00","location":"Podcast Studio","person":"Col. Michael McCarthy","org":"Aviation Expeditionary Enablers Branch","topic":"Closing Kill Chains","products":"Sparrow; curved sensor","why":"Use Sparrow as sensor-to-kill-chain data source","source":"PDF p.26"},{"id":"mr-jay-proctor-14","priority":"B","date":"Wed Apr 29","time":"14:30–15:10","location":"Podcast Studio","person":"Mr. Jay Proctor","org":"PM Intel & Cyberspace Operations","topic":"PM Intel & Cyberspace Operations","products":"Sparrow data feed","why":"Cyber/intel data integration, not hardware-first","source":"PDF p.26"},{"id":"mr-stephen-bowdren-15","priority":"A","date":"Thu Apr 30","time":"09:30–10:10","location":"Acquisitions Pavilion Stage","person":"Mr. Stephen Bowdren","org":"PEO Land Systems","topic":"Opening Remarks Day 3","products":"Sparrow; curved sensor","why":"Approach for PEO LS / GBAD / ground systems map","source":"PDF p.23"},{"id":"lt-col-dustin-scott-16","priority":"A","date":"Thu Apr 30","time":"10:30–11:10","location":"Warfighting Pavilion","person":"Lt. Col. Dustin Scott","org":"MCWL Experiments Division","topic":"Experiments Division Update: littoral mobility, C2, survivability","products":"Sparrow; Startracker+curved sensor","why":"Best route to experiments; ask for demo window","source":"PDF p.18"},{"id":"col-scott-cuomo-17","priority":"A","date":"Thu Apr 30","time":"11:40–12:20","location":"Warfighting Pavilion","person":"Col. Scott Cuomo","org":"Weapons Training Battalion, Quantico","topic":"Marine Corps Attack Drone Team: FPV Innovation","products":"Sparrow; curved sensor","why":"FPV/attack-drone user pain points; ask about payload/perception needs","source":"PDF p.18"},{"id":"lt-gen-eric-austin-maj-gen-david-walsh-b-18","priority":"A","date":"Thu Apr 30","time":"11:30–12:30","location":"Main Briefing Center","person":"Lt. Gen. Eric Austin / Maj. Gen. David Walsh / Brig. Gen. Tamara Campbell / SES Steven Bowdren","org":"Portfolio Acquisition Executive — Marine Corps / MCSC","topic":"Portfolio Acquisition Executive — Marine Corps","products":"All three, positioned by program","why":"Senior acquisition map; do not pitch deeply, ask for routing","source":"PDF p.15"},{"id":"ms-barbara-gault-19","priority":"B","date":"Thu Apr 30","time":"09:30–10:15","location":"Podcast Studio","person":"Ms. Barbara Gault","org":"PM Expeditionary Radars","topic":"PM Expeditionary Radars","products":"Sparrow; curved sensor","why":"Radar + optical fusion / C-UAS cueing angle","source":"PDF p.26"},{"id":"lt-col-joseph-taylor-20","priority":"B","date":"Thu Apr 30","time":"11:45–12:25","location":"Acquisitions Pavilion Stage","person":"Lt. Col. Joseph Taylor","org":"PM Wargaming Capability","topic":"PM Wargaming Capability Overview","products":"Sparrow data feed / synthetic sensor model","why":"Simulation/digital twin route for sensor evaluation","source":"PDF p.23"},{"id":"col-jason-duke-21","priority":"B","date":"Thu Apr 30","time":"12:30–13:10","location":"Acquisitions Pavilion Stage","person":"Col. Jason Duke","org":"PMA-276","topic":"USMC Light/Attack Helicopter","products":"Sparrow; curved sensor","why":"Airborne sensor/payload opportunity if helicopter use case is credible","source":"PDF p.23"}],"route":[{"order":"0","slot":"Préparation immédiate","place":"MDM App + floor plan","action":"Créer agenda, demandes de meetings, messages aux exposants; le guide indique que l’app permet de demander des meetings et naviguer le floor plan.","products":"All","source":"PDF p.17"},{"order":"1","slot":"Mercredi 29 / matin","place":"Hall A/B + UAS clusters","action":"AeroVironment 2215, Anduril 1326, Shield AI 1607, Skydio 613, Red Cat 2154, Redwire 529, PDW 640.","products":"Sparrow; curved sensor; Startracker+curved sensor","source":"PDF p.28, p.42, p.57"},{"order":"2","slot":"Mercredi 29 / 12:30–13:55","place":"Acquisitions Pavilion Stage","action":"PM MAGTF C2 puis MCTSSA. Objectif: C2/interoperability pathway for Sparrow outputs.","products":"Sparrow data feed","source":"PDF p.23"},{"order":"3","slot":"Mercredi 29 / après-midi","place":"C-UAS / Air Defense booths","action":"DroneShield 2557, Fortem 929, Epirus 942, Echodyne 2355, MyDefence 509, Walaris 2905.","products":"Sparrow; curved sensor","source":"PDF p.46, p.49, p.55"},{"order":"4","slot":"Mercredi 29 / 14:40–15:20","place":"Marine Zone Stage","action":"GCE UAS/C-UAS Symposium Outbrief — approach Col. Erick Clark after session.","products":"Sparrow; curved sensor","source":"PDF p.20"},{"order":"5","slot":"Jeudi 30 / 09:30–11:10","place":"Acquisitions + Warfighting","action":"PEO Land Systems opening + MCWL Experiments Division update.","products":"Sparrow; Startracker+curved sensor","source":"PDF p.23, p.18"},{"order":"6","slot":"Jeudi 30 / 10:00–12:00","place":"Optics/EO pass","action":"Teledyne FLIR 1724, Elbit 1037, L3Harris 2225, Leonardo DRS 1444, Safran 610, Maven 2649.","products":"Curved sensor; Sparrow","source":"PDF p.54-55"},{"order":"7","slot":"Jeudi 30 / 11:30–12:30","place":"Main Briefing Center","action":"Portfolio Acquisition Executive — Marine Corps. Senior map only; seek introductions, not detailed demo.","products":"All three","source":"PDF p.15"},{"order":"8","slot":"Jeudi 30 / 12:30–14:30","place":"Prime integrators pass","action":"Lockheed 1127, Northrop 1937, RTX 2237, BAE 2527, Kongsberg 2315, Rafael 1137, Saab 1337, Textron 1824, Leidos 1947.","products":"All three","source":"PDF p.35, p.42, p.46-58"},{"order":"9","slot":"End of day","place":"CRM / follow-up","action":"Classify A/B/C; send 5 best recap emails within 2 hours; propose 30-min technical call + NDA if needed.","products":"All","source":"Operational recommendation"}],"scripts":[{"product":"Sparrow","target":"UAS / C-UAS / USV / Ground ISR","pitch":"We have a compact sensing payload designed to improve tactical ISR / cueing at low SWaP. The right use case here is small UAS, C-UAS optical classification, USV/mast sensing, or vehicle-mounted situational awareness.","qualifier":"Ask: who owns payload integration and what is the test/demo path?"},{"product":"Startracker + curved sensor","target":"Alt-PNT / navigation / space-defense / aviation","pitch":"We combine star-tracker-grade optical reference with a curved-sensor approach to improve wide-field performance and resilience when GNSS is degraded or denied.","qualifier":"Ask: do you use third-party optical aiding in your navigation stack?"},{"product":"Curved sensor only","target":"EO/IR / optics / primes / sensor OEMs","pitch":"The value is enabling smaller, simpler wide-FOV optics and better edge-of-field performance, potentially reducing mass/complexity in defense imaging systems.","qualifier":"Ask: who decides between changing the optics vs changing the focal plane?"},{"product":"Government PM / lab","target":"ONR / MCWL / PMA / PEO","pitch":"Do not sell it like a catalog item. Position as a demo-ready capability and ask for the right experiment, BAA, OTA, SBIR/STTR or program transition path.","qualifier":"Ask: which office validates this capability and when is the next experiment window?"},{"product":"Prime / integrator","target":"Large defense companies","pitch":"Avoid generic BD. Ask for the exact product line or program owner: EO/IR payloads, UAS, C-UAS, alt-PNT, maritime ISR, C2 integration.","qualifier":"Ask: which business unit owns this gap?"}]};
+
+const STORAGE_KEY = 'mdm2026_state_v1';
+
+const state = {
+  meetings: {},   // id -> {type, status, summary, notes, photos[], contactName, contactEmail, contactPhone, timestamp, createdAt, updatedAt}
+  ui: {
+    subtab: 'targets',  // 'targets' | 'sessions'
+    priorityFilter: 'all',
+    statusFilter: 'all',
+    search: '',
+    dictateLang: 'fr-FR',
+  }
+};
+
+// === STORAGE ===
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (parsed.meetings) state.meetings = parsed.meetings;
+    if (parsed.ui) Object.assign(state.ui, parsed.ui);
+  } catch (e) { console.warn('loadState failed', e); }
+}
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      meetings: state.meetings,
+      ui: state.ui,
+    }));
+  } catch (e) {
+    if (e.name === 'QuotaExceededError') {
+      toast('Stockage plein — exporte tes données');
+    } else {
+      console.error(e);
+    }
+  }
+}
+
+function getOrInitMeeting(id, type) {
+  if (!state.meetings[id]) {
+    state.meetings[id] = {
+      type,
+      status: 'todo',
+      summary: '',
+      notes: '',
+      photos: [],
+      contactName: '',
+      contactEmail: '',
+      contactPhone: '',
+      timestamp: '',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+  }
+  return state.meetings[id];
+}
+
+// === UI HELPERS ===
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => Array.from(document.querySelectorAll(sel));
+
+function toast(msg, ms = 1800) {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+function escapeHtml(s) {
+  if (s == null) return '';
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  const opts = { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' };
+  return d.toLocaleString('fr-FR', opts).replace(',', '');
+}
+
+// === RENDER LIST ===
+function getStatusOf(item) {
+  const m = state.meetings[item.id];
+  return m ? m.status : 'todo';
+}
+
+function filteredItems() {
+  const isTargets = state.ui.subtab === 'targets';
+  const items = isTargets ? SEED_DATA.targets : SEED_DATA.sessions;
+  const q = state.ui.search.trim().toLowerCase();
+  return items.filter(it => {
+    if (state.ui.priorityFilter !== 'all' && it.priority !== state.ui.priorityFilter) return false;
+    if (state.ui.statusFilter !== 'all' && getStatusOf(it) !== state.ui.statusFilter) return false;
+    if (q) {
+      const blob = isTargets
+        ? `${it.name} ${it.segment} ${it.location} ${it.activity} ${it.products} ${it.who}`.toLowerCase()
+        : `${it.person} ${it.org} ${it.topic} ${it.location} ${it.products}`.toLowerCase();
+      if (!blob.includes(q)) return false;
+    }
+    return true;
+  }).sort((a, b) => {
+    // Priority A first, then status: followup > todo > done > skip
+    const pA = a.priority === 'A' ? 0 : 1;
+    const pB = b.priority === 'A' ? 0 : 1;
+    if (pA !== pB) return pA - pB;
+    const sOrder = { followup: 0, todo: 1, done: 2, skip: 3 };
+    return (sOrder[getStatusOf(a)] ?? 99) - (sOrder[getStatusOf(b)] ?? 99);
+  });
+}
+
+function renderList() {
+  const items = filteredItems();
+  const container = $('#list-container');
+  const isTargets = state.ui.subtab === 'targets';
+
+  if (items.length === 0) {
+    container.innerHTML = `<div class="empty">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <p>Aucun résultat. Essaie d'ajuster tes filtres.</p>
+    </div>`;
+    return;
+  }
+
+  container.innerHTML = items.map(it => {
+    const status = getStatusOf(it);
+    const m = state.meetings[it.id];
+    const statusIcon = status === 'done' ? '✓' : status === 'followup' ? '↻' : status === 'skip' ? '−' : '';
+
+    if (isTargets) {
+      return `<div class="card status-${status}" data-id="${escapeHtml(it.id)}" data-type="target">
+        <div class="card-row1">
+          <span class="priority-badge priority-${escapeHtml(it.priority)}">${escapeHtml(it.priority)}</span>
+          <span class="segment-tag">${escapeHtml(it.segment)}</span>
+          ${statusIcon ? `<span class="status-icon ${status}">${statusIcon}</span>` : ''}
+        </div>
+        <div class="card-name">${escapeHtml(it.name)}</div>
+        <div class="card-meta">
+          <span class="booth">${escapeHtml(it.location)}</span>
+          ${m && m.contactName ? `<span>· ${escapeHtml(m.contactName)}</span>` : ''}
+        </div>
+        <div class="card-products">${escapeHtml(it.products)}</div>
+      </div>`;
+    } else {
+      return `<div class="card status-${status}" data-id="${escapeHtml(it.id)}" data-type="session">
+        <div class="card-row1">
+          <span class="priority-badge priority-${escapeHtml(it.priority)}">${escapeHtml(it.priority)}</span>
+          <span class="segment-tag">${escapeHtml(it.date)} · ${escapeHtml(it.time)}</span>
+          ${statusIcon ? `<span class="status-icon ${status}">${statusIcon}</span>` : ''}
+        </div>
+        <div class="card-name">${escapeHtml(it.person)}</div>
+        <div class="card-meta">
+          <span class="booth">${escapeHtml(it.location)}</span>
+          <span>· ${escapeHtml(it.org)}</span>
+        </div>
+        <div class="card-products">${escapeHtml(it.topic)}</div>
+      </div>`;
+    }
+  }).join('');
+
+  // Update sub-tab counts
+  $('#tg-count').textContent = `(${SEED_DATA.targets.length})`;
+  $('#ss-count').textContent = `(${SEED_DATA.sessions.length})`;
+}
+
+// === DETAIL MODAL ===
+let currentDetail = null;
+
+function openDetail(id, type) {
+  const items = type === 'target' ? SEED_DATA.targets : SEED_DATA.sessions;
+  const item = items.find(x => x.id === id);
+  if (!item) return;
+  currentDetail = { item, type, id };
+  const m = getOrInitMeeting(id, type);
+
+  $('#modal-title').textContent = type === 'target' ? item.name : item.person;
+  if (type === 'target') {
+    $('#modal-subline').innerHTML = `
+      <span class="priority-badge priority-${escapeHtml(item.priority)}">${escapeHtml(item.priority)}</span>
+      <span class="segment-tag">${escapeHtml(item.segment)}</span>
+      <span class="booth">${escapeHtml(item.location)}</span>
+    `;
+  } else {
+    $('#modal-subline').innerHTML = `
+      <span class="priority-badge priority-${escapeHtml(item.priority)}">${escapeHtml(item.priority)}</span>
+      <span class="segment-tag">${escapeHtml(item.date)} · ${escapeHtml(item.time)}</span>
+      <span class="booth">${escapeHtml(item.location)}</span>
+    `;
+  }
+
+  $('#modal-body').innerHTML = type === 'target' ? renderTargetDetail(item, m) : renderSessionDetail(item, m);
+
+  attachDetailListeners();
+
+  $('#modal-backdrop').classList.add('open');
+  $('#modal').classList.add('open');
+}
+
+function closeDetail() {
+  $('#modal').classList.remove('open');
+  $('#modal-backdrop').classList.remove('open');
+  // stop dictation if active
+  stopDictation();
+  currentDetail = null;
+  // Re-render list since status may have changed
+  renderList();
+  updateAppbarStats();
+}
+
+function renderTargetDetail(item, m) {
+  return `
+    <div class="section">
+      <div class="section-title">Brief commercial</div>
+      <div class="brief">
+        <div class="brief-row"><span class="label">Activité</span><span class="value">${escapeHtml(item.activity)}</span></div>
+        <div class="brief-row"><span class="label">Qui viser</span><span class="value">${escapeHtml(item.who)}</span></div>
+        <div class="brief-row"><span class="label">Produits à pousser</span><span class="value">${escapeHtml(item.products)}</span></div>
+        <div class="brief-row"><span class="label">Angle</span><span class="value">${escapeHtml(item.angle)}</span></div>
+        <div class="brief-row"><span class="label">Action RDV</span><span class="value" style="color:var(--accent);font-weight:500;">${escapeHtml(item.action)}</span></div>
+      </div>
+    </div>
+    ${renderStatusButtons(m)}
+    ${renderMeetingForm(m)}
+    <div class="section" style="margin-top:24px;">
+      <div class="section-title">Source guide</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-faint);">${escapeHtml(item.source)}</div>
+    </div>
+  `;
+}
+
+function renderSessionDetail(item, m) {
+  return `
+    <div class="section">
+      <div class="section-title">Session</div>
+      <div class="brief">
+        <div class="brief-row"><span class="label">Personne</span><span class="value">${escapeHtml(item.person)}</span></div>
+        <div class="brief-row"><span class="label">Organisation</span><span class="value">${escapeHtml(item.org)}</span></div>
+        <div class="brief-row"><span class="label">Sujet</span><span class="value">${escapeHtml(item.topic)}</span></div>
+        <div class="brief-row"><span class="label">Produits à pousser</span><span class="value">${escapeHtml(item.products)}</span></div>
+        <div class="brief-row"><span class="label">Pourquoi / action</span><span class="value" style="color:var(--accent);font-weight:500;">${escapeHtml(item.why)}</span></div>
+      </div>
+    </div>
+    ${renderStatusButtons(m)}
+    ${renderMeetingForm(m)}
+    <div class="section" style="margin-top:24px;">
+      <div class="section-title">Source guide</div>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-faint);">${escapeHtml(item.source)}</div>
+    </div>
+  `;
+}
+
+function renderStatusButtons(m) {
+  return `
+    <div class="section">
+      <div class="section-title">Statut</div>
+      <div class="status-buttons">
+        <div class="status-btn done ${m.status === 'done' ? 'active' : ''}" data-status="done">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Fait
+        </div>
+        <div class="status-btn followup ${m.status === 'followup' ? 'active' : ''}" data-status="followup">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Follow-up
+        </div>
+        <div class="status-btn skip ${m.status === 'skip' ? 'active' : ''}" data-status="skip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Skip
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderMeetingForm(m) {
+  return `
+    <div class="section">
+      <div class="section-title">Contact rencontré</div>
+      <div class="field">
+        <label>Nom de la personne</label>
+        <input class="input" type="text" id="f-contact-name" value="${escapeHtml(m.contactName || '')}" placeholder="Prénom Nom">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input class="input" type="email" id="f-contact-email" value="${escapeHtml(m.contactEmail || '')}" placeholder="firstname.lastname@org.com" inputmode="email" autocapitalize="off">
+      </div>
+      <div class="field">
+        <label>Téléphone</label>
+        <input class="input" type="tel" id="f-contact-phone" value="${escapeHtml(m.contactPhone || '')}" placeholder="+1 ..." inputmode="tel">
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Compte rendu RDV</div>
+      <div class="field summary-row">
+        <label>Résumé / discussion / next steps</label>
+        <textarea class="textarea" id="f-summary" rows="6" placeholder="Tape ou dicte au micro à droite…">${escapeHtml(m.summary || '')}</textarea>
+        <button class="dictate-btn" id="dictate-btn" type="button" aria-label="Dicter">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+        <div class="dictate-lang">
+          <span class="${state.ui.dictateLang === 'fr-FR' ? 'active' : ''}" data-lang="fr-FR">FR</span>
+          <span class="${state.ui.dictateLang === 'en-US' ? 'active' : ''}" data-lang="en-US">EN</span>
+        </div>
+      </div>
+      <div class="field" style="margin-top: 28px;">
+        <label>Notes additionnelles</label>
+        <textarea class="textarea" id="f-notes" rows="3" placeholder="Notes libres">${escapeHtml(m.notes || '')}</textarea>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Cartes de visite / photos</div>
+      <div class="photo-grid" id="photo-grid">
+        ${(m.photos || []).map((p, i) => `
+          <div class="photo-thumb" data-idx="${i}">
+            <img src="${p}" alt="" loading="lazy">
+            <button class="remove" data-remove="${i}" aria-label="Supprimer">×</button>
+          </div>
+        `).join('')}
+        <label class="photo-add" id="photo-add">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <input type="file" accept="image/*" capture="environment" id="photo-input">
+        </label>
+      </div>
+      <div style="font-size:11px;color:var(--text-faint);margin-top:6px;">Tape sur l'icône caméra pour photographier une carte. Tape sur une vignette pour l'agrandir.</div>
+    </div>
+
+    ${m.timestamp ? `<div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-faint);margin-top:8px;">Dernière màj : ${escapeHtml(formatDate(m.updatedAt || m.timestamp))}</div>` : ''}
+  `;
+}
+
+// === DETAIL FORM HANDLERS ===
+function attachDetailListeners() {
+  // Status buttons
+  $$('.status-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const newStatus = btn.dataset.status;
+      const m = state.meetings[currentDetail.id];
+      // Toggle: if same status clicked, revert to todo
+      m.status = (m.status === newStatus) ? 'todo' : newStatus;
+      m.updatedAt = new Date().toISOString();
+      if (m.status === 'done' && !m.timestamp) m.timestamp = new Date().toISOString();
+      saveState();
+      // Update active class
+      $$('.status-btn').forEach(b => b.classList.remove('active'));
+      if (m.status !== 'todo') {
+        const activeBtn = document.querySelector(`.status-btn[data-status="${m.status}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+      }
+      toast(m.status === 'done' ? 'Marqué fait' : m.status === 'followup' ? 'Follow-up activé' : m.status === 'skip' ? 'Skippé' : 'Réinitialisé');
+    });
+  });
+
+  // Field listeners (debounced save)
+  const fields = [
+    ['#f-contact-name', 'contactName'],
+    ['#f-contact-email', 'contactEmail'],
+    ['#f-contact-phone', 'contactPhone'],
+    ['#f-summary', 'summary'],
+    ['#f-notes', 'notes'],
+  ];
+  fields.forEach(([sel, key]) => {
+    const el = $(sel);
+    if (!el) return;
+    el.addEventListener('input', debounce(() => {
+      const m = state.meetings[currentDetail.id];
+      m[key] = el.value;
+      m.updatedAt = new Date().toISOString();
+      if (!m.timestamp) m.timestamp = new Date().toISOString();
+      saveState();
+    }, 350));
+  });
+
+  // Dictation button
+  const dictBtn = $('#dictate-btn');
+  if (dictBtn) {
+    dictBtn.addEventListener('click', toggleDictation);
+  }
+
+  // Language toggle
+  $$('.dictate-lang span').forEach(s => {
+    s.addEventListener('click', () => {
+      state.ui.dictateLang = s.dataset.lang;
+      saveState();
+      $$('.dictate-lang span').forEach(x => x.classList.toggle('active', x.dataset.lang === state.ui.dictateLang));
+    });
+  });
+
+  // Photo input
+  const photoInput = $('#photo-input');
+  if (photoInput) {
+    photoInput.addEventListener('change', handlePhotoUpload);
+  }
+
+  // Photo thumb click (fullscreen) and remove
+  $$('#photo-grid .photo-thumb').forEach(t => {
+    t.addEventListener('click', (e) => {
+      if (e.target.classList.contains('remove')) {
+        e.stopPropagation();
+        const idx = parseInt(e.target.dataset.remove);
+        if (confirm('Supprimer cette photo ?')) {
+          const m = state.meetings[currentDetail.id];
+          m.photos.splice(idx, 1);
+          m.updatedAt = new Date().toISOString();
+          saveState();
+          // Re-render the photo grid only
+          rerenderModal();
+        }
+      } else {
+        const idx = parseInt(t.dataset.idx);
+        const m = state.meetings[currentDetail.id];
+        if (m.photos[idx]) {
+          $('#photo-fullscreen-img').src = m.photos[idx];
+          $('#photo-fullscreen').classList.add('open');
+        }
+      }
+    });
+  });
+}
+
+function rerenderModal() {
+  if (!currentDetail) return;
+  // Preserve scroll
+  const scrollTop = $('#modal-body').scrollTop;
+  const m = state.meetings[currentDetail.id];
+  $('#modal-body').innerHTML = currentDetail.type === 'target'
+    ? renderTargetDetail(currentDetail.item, m)
+    : renderSessionDetail(currentDetail.item, m);
+  attachDetailListeners();
+  $('#modal-body').scrollTop = scrollTop;
+}
+
+function debounce(fn, ms) {
+  let t;
+  return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
+}
+
+// === PHOTO HANDLING ===
+async function handlePhotoUpload(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  toast('Compression photo…');
+  try {
+    const dataUrl = await compressImage(file, 1100, 0.72);
+    const m = state.meetings[currentDetail.id];
+    m.photos = m.photos || [];
+    m.photos.push(dataUrl);
+    m.updatedAt = new Date().toISOString();
+    if (!m.timestamp) m.timestamp = new Date().toISOString();
+    saveState();
+    rerenderModal();
+    toast('Photo ajoutée');
+  } catch (err) {
+    console.error(err);
+    toast('Échec photo');
+  }
+  e.target.value = ''; // reset input
+}
+
+function compressImage(file, maxWidth = 1100, quality = 0.72) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const scale = Math.min(1, maxWidth / img.width);
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        try {
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        } catch (err) { reject(err); }
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// === DICTATION ===
+let recognition = null;
+let recognitionActive = false;
+let baselineTextAtRecord = '';
+
+function toggleDictation() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    toast('Dictation non supportée — utilise le micro du clavier iOS');
+    return;
+  }
+  if (recognitionActive) {
+    stopDictation();
+    return;
+  }
+  startDictation(SR);
+}
+
+function startDictation(SR) {
+  recognition = new SR();
+  recognition.lang = state.ui.dictateLang;
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  const summary = $('#f-summary');
+  baselineTextAtRecord = summary.value;
+  let finalSegment = '';
+
+  recognition.onresult = (event) => {
+    let interim = '';
+    finalSegment = '';
+    for (let i = 0; i < event.results.length; i++) {
+      const r = event.results[i];
+      if (r.isFinal) finalSegment += r[0].transcript;
+      else interim += r[0].transcript;
+    }
+    const newText = (baselineTextAtRecord ? baselineTextAtRecord + ' ' : '') + finalSegment + interim;
+    summary.value = newText;
+  };
+  recognition.onerror = (e) => {
+    console.warn('rec err', e);
+    if (e.error === 'not-allowed') {
+      toast('Permission micro refusée');
+    } else if (e.error === 'no-speech') {
+      // ignore
+    } else {
+      toast('Erreur dictation: ' + e.error);
+    }
+    stopDictation();
+  };
+  recognition.onend = () => {
+    // Always persist whatever's in the textarea (covers manual stop, auto stop, errors)
+    if (currentDetail) {
+      const m = state.meetings[currentDetail.id];
+      const ta = $('#f-summary');
+      if (m && ta) {
+        m.summary = ta.value;
+        m.updatedAt = new Date().toISOString();
+        if (!m.timestamp) m.timestamp = new Date().toISOString();
+        saveState();
+      }
+    }
+    recognitionActive = false;
+    const btn = $('#dictate-btn');
+    if (btn) btn.classList.remove('recording');
+  };
+
+  try {
+    recognition.start();
+    recognitionActive = true;
+    const btn = $('#dictate-btn');
+    if (btn) btn.classList.add('recording');
+    toast('Dicte… retape pour stopper');
+  } catch (e) {
+    console.error(e);
+    toast('Impossible de démarrer dictation');
+  }
+}
+
+function stopDictation() {
+  if (recognition && recognitionActive) {
+    try { recognition.stop(); } catch (e) {}
+    // recognitionActive = false; will be set by onend
+  }
+}
+
+// === STATS ===
+function renderStats() {
+  const allItems = [
+    ...SEED_DATA.targets.map(t => ({ ...t, _type: 'target' })),
+    ...SEED_DATA.sessions.map(s => ({ ...s, _type: 'session', name: s.person })),
+  ];
+  const total = allItems.length;
+  const totalTargets = SEED_DATA.targets.length;
+  const totalSessions = SEED_DATA.sessions.length;
+
+  let done = 0, followup = 0, todo = 0, skip = 0;
+  let doneA = 0, totalA = 0, doneB = 0, totalB = 0;
+
+  allItems.forEach(it => {
+    const status = getStatusOf(it);
+    if (status === 'done') done++;
+    else if (status === 'followup') followup++;
+    else if (status === 'skip') skip++;
+    else todo++;
+    if (it.priority === 'A') {
+      totalA++;
+      if (status === 'done') doneA++;
+    } else if (it.priority === 'B') {
+      totalB++;
+      if (status === 'done') doneB++;
+    }
+  });
+
+  const pctTotal = total > 0 ? Math.round(100 * (done + skip) / total) : 0;
+
+  $('#stats-subtitle').textContent = `${total} cibles totales — ${done + skip} traitées (${pctTotal}%)`;
+
+  $('#stats-grid').innerHTML = `
+    <div class="stat-card">
+      <div class="label">Faits</div>
+      <div class="value done">${done}</div>
+      <div class="sub">sur ${total}</div>
+      <div class="progress-bar"><div style="width:${total > 0 ? (done / total * 100) : 0}%;background:var(--done);"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Follow-up</div>
+      <div class="value followup">${followup}</div>
+      <div class="sub">à relancer</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Priorité A</div>
+      <div class="value accent">${doneA}/${totalA}</div>
+      <div class="sub">faits</div>
+      <div class="progress-bar"><div style="width:${totalA > 0 ? (doneA / totalA * 100) : 0}%"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Priorité B</div>
+      <div class="value accent">${doneB}/${totalB}</div>
+      <div class="sub">faits</div>
+      <div class="progress-bar"><div style="width:${totalB > 0 ? (doneB / totalB * 100) : 0}%"></div></div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Sociétés</div>
+      <div class="value">${totalTargets}</div>
+      <div class="sub">cibles RDV</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Sessions</div>
+      <div class="value">${totalSessions}</div>
+      <div class="sub">à viser</div>
+    </div>
+  `;
+
+  // Recent activity (top 8 most recent)
+  const activity = Object.entries(state.meetings)
+    .filter(([id, m]) => m.updatedAt && (m.summary || m.contactName || m.photos?.length))
+    .sort((a, b) => new Date(b[1].updatedAt) - new Date(a[1].updatedAt))
+    .slice(0, 8);
+
+  if (activity.length === 0) {
+    $('#recent-activity').innerHTML = `<div style="font-size:13px;color:var(--text-faint);padding:10px 0;">Aucun RDV enregistré pour l'instant.</div>`;
+  } else {
+    $('#recent-activity').innerHTML = activity.map(([id, m]) => {
+      const item = m.type === 'target'
+        ? SEED_DATA.targets.find(x => x.id === id)
+        : SEED_DATA.sessions.find(x => x.id === id);
+      if (!item) return '';
+      const name = m.type === 'target' ? item.name : item.person;
+      const status = m.status;
+      const icon = status === 'done' ? '✓' : status === 'followup' ? '↻' : '·';
+      const iconColor = status === 'done' ? 'var(--done)' : status === 'followup' ? 'var(--followup)' : 'var(--text-faint)';
+      return `<div class="activity-item" data-id="${escapeHtml(id)}" data-type="${escapeHtml(m.type)}">
+        <div style="flex:1;min-width:0;">
+          <div class="name" style="display:flex;align-items:center;gap:6px;"><span style="color:${iconColor};font-size:14px;">${icon}</span> ${escapeHtml(name)}</div>
+          ${m.contactName ? `<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${escapeHtml(m.contactName)}</div>` : ''}
+        </div>
+        <div class="ts">${escapeHtml(formatDate(m.updatedAt))}</div>
+      </div>`;
+    }).join('');
+
+    $$('#recent-activity .activity-item').forEach(el => {
+      el.addEventListener('click', () => openDetail(el.dataset.id, el.dataset.type));
+    });
+  }
+
+  // Followup list
+  const followups = Object.entries(state.meetings)
+    .filter(([id, m]) => m.status === 'followup')
+    .sort((a, b) => new Date(b[1].updatedAt) - new Date(a[1].updatedAt));
+
+  if (followups.length === 0) {
+    $('#followup-list').innerHTML = `<div style="font-size:13px;color:var(--text-faint);padding:10px 0;">Aucun follow-up actif.</div>`;
+  } else {
+    $('#followup-list').innerHTML = followups.map(([id, m]) => {
+      const item = m.type === 'target'
+        ? SEED_DATA.targets.find(x => x.id === id)
+        : SEED_DATA.sessions.find(x => x.id === id);
+      if (!item) return '';
+      const name = m.type === 'target' ? item.name : item.person;
+      return `<div class="activity-item" data-id="${escapeHtml(id)}" data-type="${escapeHtml(m.type)}">
+        <div style="flex:1;min-width:0;">
+          <div class="name" style="color:var(--followup);">↻ ${escapeHtml(name)}</div>
+          ${m.contactName ? `<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${escapeHtml(m.contactName)}${m.contactEmail ? ' · ' + escapeHtml(m.contactEmail) : ''}</div>` : ''}
+        </div>
+        <div class="ts">${escapeHtml(formatDate(m.updatedAt))}</div>
+      </div>`;
+    }).join('');
+
+    $$('#followup-list .activity-item').forEach(el => {
+      el.addEventListener('click', () => openDetail(el.dataset.id, el.dataset.type));
+    });
+  }
+}
+
+function updateAppbarStats() {
+  const total = SEED_DATA.targets.length + SEED_DATA.sessions.length;
+  const done = Object.values(state.meetings).filter(m => m.status === 'done').length;
+  $('#stat-done').textContent = done;
+  $('#appbar-stats').innerHTML = `<span class="pill"><strong>${done}</strong>/${total}</span>`;
+}
+
+// === PLAN VIEW ===
+function renderPlan() {
+  $('#route-list').innerHTML = SEED_DATA.route.map(r => `
+    <div class="route-step" data-order="${escapeHtml(r.order)}">
+      <div class="slot">${escapeHtml(r.slot)}</div>
+      <div class="place">${escapeHtml(r.place)}</div>
+      <div class="action">${escapeHtml(r.action)}</div>
+      ${r.products && r.products !== 'All' && r.products !== 'nan' ? `<div style="font-size:11px;color:var(--accent);margin-top:6px;font-family:'JetBrains Mono',monospace;letter-spacing:0.05em;">→ ${escapeHtml(r.products)}</div>` : ''}
+    </div>
+  `).join('');
+
+  $('#scripts-list').innerHTML = SEED_DATA.scripts.map(s => `
+    <div class="script-card">
+      <h4>${escapeHtml(s.product)}</h4>
+      <div class="target">Cible : ${escapeHtml(s.target)}</div>
+      <div class="pitch">${escapeHtml(s.pitch)}</div>
+      <div class="qualifier">Q. de qualification : ${escapeHtml(s.qualifier)}</div>
+    </div>
+  `).join('');
+}
+
+// === EXPORT / IMPORT ===
+function exportData() {
+  const blob = new Blob([JSON.stringify({
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    meetings: state.meetings,
+    ui: state.ui,
+  }, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 16);
+  a.href = url;
+  a.download = `mdm2026_export_${ts}.json`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 100);
+  toast('Export téléchargé');
+}
+
+function importData() {
+  $('#import-file').click();
+}
+
+function handleImport(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (evt) => {
+    try {
+      const data = JSON.parse(evt.target.result);
+      if (!data.meetings) throw new Error('Format invalide');
+      if (!confirm(`Importer ${Object.keys(data.meetings).length} RDV ? Cela remplacera les données actuelles.`)) return;
+      state.meetings = data.meetings;
+      if (data.ui) Object.assign(state.ui, data.ui);
+      saveState();
+      renderAll();
+      toast('Import OK');
+    } catch (err) {
+      toast('Fichier invalide');
+      console.error(err);
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function clearAll() {
+  if (!confirm('Effacer TOUTES les notes, photos et statuts ? Cette action est irréversible. (Pense à exporter d\'abord)')) return;
+  if (!confirm('Vraiment sûr ? Tout sera perdu.')) return;
+  state.meetings = {};
+  saveState();
+  renderAll();
+  toast('Données effacées');
+}
+
+// === RENDER ALL ===
+function renderAll() {
+  renderList();
+  renderPlan();
+  renderStats();
+  updateAppbarStats();
+}
+
+// === EVENT WIRING ===
+function init() {
+  loadState();
+
+  // Tab switching
+  $$('.tab[data-view]').forEach(tab => {
+    tab.addEventListener('click', () => {
+      $$('.tab[data-view]').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      const target = tab.dataset.view;
+      $$('.view').forEach(v => v.classList.toggle('active', v.id === target));
+      $('.main').scrollTop = 0;
+      if (target === 'view-stats') renderStats();
+    });
+  });
+
+  // Quick search tab → focus search
+  $('#quick-search-tab').addEventListener('click', () => {
+    $$('.tab[data-view]').forEach(t => t.classList.remove('active'));
+    document.querySelector('.tab[data-view="view-list"]').classList.add('active');
+    $$('.view').forEach(v => v.classList.toggle('active', v.id === 'view-list'));
+    setTimeout(() => $('#search').focus(), 100);
+  });
+
+  // Sub-tabs (targets / sessions)
+  $$('.subtab').forEach(s => {
+    s.addEventListener('click', () => {
+      state.ui.subtab = s.dataset.subtab;
+      $$('.subtab').forEach(x => x.classList.toggle('active', x.dataset.subtab === state.ui.subtab));
+      saveState();
+      renderList();
+    });
+  });
+
+  // Search
+  $('#search').addEventListener('input', debounce((e) => {
+    state.ui.search = e.target.value;
+    renderList();
+  }, 200));
+
+  // Chip filters
+  $$('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      const filter = chip.dataset.filter;
+      const value = chip.dataset.value;
+      if (filter === 'priority') {
+        state.ui.priorityFilter = value;
+        $$('.chip[data-filter="priority"]').forEach(c => c.classList.toggle('active', c.dataset.value === value));
+        // status filter resets only when toggled
+      } else if (filter === 'status') {
+        // Toggle: clicking active status clears it (back to 'all')
+        state.ui.statusFilter = (state.ui.statusFilter === value) ? 'all' : value;
+        $$('.chip[data-filter="status"]').forEach(c => c.classList.toggle('active', c.dataset.value === state.ui.statusFilter));
+      }
+      renderList();
+    });
+  });
+
+  // Card click
+  $('#list-container').addEventListener('click', (e) => {
+    const card = e.target.closest('.card');
+    if (!card) return;
+    openDetail(card.dataset.id, card.dataset.type);
+  });
+
+  // Modal close
+  $('#modal-close').addEventListener('click', closeDetail);
+  $('#modal-backdrop').addEventListener('click', closeDetail);
+
+  // Photo fullscreen close
+  $('#photo-close').addEventListener('click', () => $('#photo-fullscreen').classList.remove('open'));
+  $('#photo-fullscreen').addEventListener('click', (e) => {
+    if (e.target.id === 'photo-fullscreen') $('#photo-fullscreen').classList.remove('open');
+  });
+
+  // Stats actions
+  $('#export-btn').addEventListener('click', exportData);
+  $('#import-btn').addEventListener('click', importData);
+  $('#import-file').addEventListener('change', handleImport);
+  $('#clear-btn').addEventListener('click', clearAll);
+
+  // ESC key closes modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      if ($('#photo-fullscreen').classList.contains('open')) {
+        $('#photo-fullscreen').classList.remove('open');
+      } else if ($('#modal').classList.contains('open')) {
+        closeDetail();
+      }
+    }
+  });
+
+  // Render
+  renderAll();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
